@@ -11,11 +11,23 @@
   ; (on-prompt-clicked [this state arg] "What should happen when a button on a prompt is clicked.")
   )
 
+(defn ^:private default-continue
+  [this state]
+  (throw (ex-info (str "Step <" this "> is not a valid step") {:step this
+                                                               :state state})))
+(defn ^:private default-complete?
+  [this]
+  (throw (ex-info (str "Step <" this "> is not a valid step") {:step this})))
+(defn ^:private default-validate
+  [this]
+  (throw (ex-info (str "Step <" this "> is not a valid step") {:step this})))
+
 (extend-protocol IStep
   Object
-  (continue [this _state]
-    (throw (ex-info (str "Step <" this "> is not a valid step") {:data this})))
-  (complete? [this]
-    (throw (ex-info (str "Step <" this "> is not a valid step") {:data this})))
-  (validate [this]
-    (throw (ex-info (str "Step <" this "> is not a valid step") {:data this}))))
+  (continue [this state] (default-continue this state))
+  (complete? [this] (default-complete? this))
+  (validate [this] (default-validate this))
+  nil
+  (continue [this state] (default-continue this state))
+  (complete? [this] (default-complete? this))
+  (validate [this] (default-validate this)))
