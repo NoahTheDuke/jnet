@@ -5,9 +5,9 @@
     [malli.error :as me]))
 
 (defrecord BaseStep
-  [complete? continue type uuid]
+  [complete? continue-step type uuid]
   IStep
-  (continue [this state] (continue this state))
+  (continue-step [this state] (continue-step this state))
   (complete? [this] (:complete? this))
   ; (on-card-clicked [_this _game _player _card])
   ; (on-prompt-clicked [_this _game _arg])
@@ -23,7 +23,7 @@
   ([opts]
    (->> opts
         (merge {:complete? false
-                :continue (constantly true)
+                :continue-step (fn [_ game] [true game])
                 ; :on-card-clicked (constantly nil)
                 ; :on-prompt-clicked (constantly nil)
                 :type :step/base

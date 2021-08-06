@@ -52,3 +52,55 @@
               (assoc-in [:gp :pipeline 0] (make-base-step))
               (sut/drop-current-step)
               (get-in [:gp :pipeline]))))))
+
+(deftest update-pipeline-step
+  (let [game (new-game nil)]
+    (is (= game (sut/update-pipeline game))))
+  (let [step (make-base-step)
+        game (-> (new-game nil)
+                 (sut/queue-step step))]
+    (is (= {:pipeline [step] :queue []}
+           (:gp (sut/update-pipeline game)))))
+  (let [step (make-base-step)
+        game (-> (new-game nil)
+                 (assoc-in [:gp :pipeline] [:a :b :c])
+                 (sut/queue-step step))]
+    (is (= {:pipeline [step :a :b :c] :queue []}
+           (:gp (sut/update-pipeline game)))))
+  (let [step (make-base-step)
+        step2 (make-base-step)
+        game (-> (new-game nil)
+                 (assoc-in [:gp :pipeline] [:a :b :c])
+                 (sut/queue-step step)
+                 (sut/update-pipeline)
+                 (sut/queue-step step2))]
+    (is (= {:pipeline [step2 step :a :b :c] :queue []}
+           (:gp (sut/update-pipeline game))))))
+
+(deftest continue-gp-test
+  (testing "returns true by default"
+    (let [game (new-game nil)]
+      (is (= [true game] (sut/continue-game game)))))
+  (testing "updates the pipeline"
+    (let [step (make-base-step
+                 {:continue-step
+                  (fn [_step game] [false game])})
+          game (-> (new-game nil)
+                   (sut/queue-step step))]
+      (is (= {:pipeline [step] :queue []}
+             (:gp (second (sut/continue-game game)))))))
+  (testing "calls 'continue-step' on current step"
+    (let [step (make-base-step
+                 {:continue-step
+                  (fn [_step _game] [false :foo])})
+          game (-> (new-game nil)
+                   (sut/queue-step step))]
+      (is (= [false :foo] (sut/continue-game game)))))
+  (testing "drops the current step if 'continue-step' returns true"
+    (let [step (make-base-step
+                 {:continue-step
+                  (fn [_step game] [true game])})
+          game (-> (new-game nil)
+                   (sut/queue-step step)
+                   (sut/continue-game))]
+      (is (= {:pipeline [] :queue []} (:gp (second game)))))))

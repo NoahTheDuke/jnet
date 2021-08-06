@@ -4,10 +4,10 @@
     [engine.steps.step-protocol :as sut]))
 
 (deftest step-protocol-continue-test
-  (is (thrown? clojure.lang.ExceptionInfo (sut/continue nil nil)))
-  (is (thrown? clojure.lang.ExceptionInfo (sut/continue {} nil)))
-  (is (thrown-with-msg? clojure.lang.ExceptionInfo #"Step <.*> is not a valid step" (sut/continue nil nil)))
-  (is (thrown-with-msg? clojure.lang.ExceptionInfo #"Step <.*> is not a valid step" (sut/continue {} nil)))
+  (is (thrown? clojure.lang.ExceptionInfo (sut/continue-step nil nil)))
+  (is (thrown? clojure.lang.ExceptionInfo (sut/continue-step {} nil)))
+  (is (thrown-with-msg? clojure.lang.ExceptionInfo #"Step <.*> is not a valid step" (sut/continue-step nil nil)))
+  (is (thrown-with-msg? clojure.lang.ExceptionInfo #"Step <.*> is not a valid step" (sut/continue-step {} nil)))
   )
 
 (deftest step-protocol-complete?g-test

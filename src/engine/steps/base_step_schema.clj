@@ -5,7 +5,7 @@
 (def BaseStepSchema
   [:map {:closed true}
    [:complete? boolean?]
-   [:continue [:=> [:cat :map :map] [:cat :boolean :any]]]
+   [:continue-step [:=> [:cat :map :map] [:cat :boolean :any]]]
    ; [:on-card-clicked [:=> [:cat :map] [:boolean any?]]]
    ; [:on-prompt-clicked [:=> [:cat :map] [:boolean any?]]]
    [:type [:qualified-keyword {:namespace :step}]]
