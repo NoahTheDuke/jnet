@@ -1,7 +1,8 @@
-(ns jnet.set-up
-  (:require [jnet.card :refer [build-card]]
-            [jnet.player :refer [new-corp new-runner init-player]]
-            [jnet.game :refer [new-game]]))
+(ns engine.set-up
+  (:require
+   [engine.cards :refer [build-card]]
+   [engine.game :refer [new-game]]
+   [engine.player :refer [init-player new-corp new-runner]]))
 
 (defn create-deck
   [deck]

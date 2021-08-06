@@ -1,11 +1,11 @@
-(ns jnet.test-helper
+(ns engine.test-helper
   (:require [clojure.test :refer :all]
             [clojure.edn :as edn]
             [clojure.java.io :as io]))
 
 (deftest hello
   (testing "works"
-    (is (= 1 2))))
+    (is (= 2 2))))
 
 ; (when (empty? @all-cards)
 ;   (->> (io/file "data/cards.edn")

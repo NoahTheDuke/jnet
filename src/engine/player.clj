@@ -1,4 +1,4 @@
-(ns jnet.player)
+(ns engine.player)
 
 (defn new-player
   [user identity deck]
@@ -70,20 +70,6 @@
     (-> player
         (init-hand)
         (set-prompt mulligan-prompt))))
-
-(defn keep-hand
-  [player]
-  (-> player
-      (assoc :ready-to-start true)
-      (set-prompt {:menu-title "Waiting for opponent to keep or mulligan"})))
-
-(defn mulligan-hand
-  [player]
-  (-> player
-      (assoc :ready-to-start true
-             :mulligan true)
-      (init-hand)
-      (set-prompt {:menu-title "Waiting for opponent to keep or mulligan"})))
 
 (defn get-player-state
   [player side active-player?]

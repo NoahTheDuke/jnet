@@ -1,1 +1,0 @@
-(ns jnet.card-test)
