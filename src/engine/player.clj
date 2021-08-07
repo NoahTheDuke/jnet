@@ -1,7 +1,7 @@
 (ns engine.player)
 
 (defn new-player
-  [user identity deck]
+  [{:keys [user identity deck]}]
   {:deck-list deck
    :deck deck
    :discard []
@@ -22,20 +22,18 @@
    :ready-to-start false
    :user user})
 
-; (defn new-corp
-;   [user identity deck]
-;   (merge
-;     (new-player user identity deck)
-;     {:bad-publicity {:base 0
-;                      :additional 0}
-;      :clicks-per-turn 3}))
+(defn new-corp [opts]
+  (merge
+    (new-player opts)
+    {:bad-publicity {:base 0
+                     :additional 0}
+     :clicks-per-turn 3}))
 
-; (defn new-runner
-;   [user identity deck]
-;   (merge
-;     (new-player user identity deck)
-;     {:brain-damage 0
-;      :clicks-per-turn 4
-;      :link 0
-;      :memory 4
-;      :tag 0}))
+(defn new-runner [opts]
+  (merge
+    (new-player opts)
+    {:brain-damage 0
+     :clicks-per-turn 4
+     :link 0
+     :memory 4
+     :tags 0}))
