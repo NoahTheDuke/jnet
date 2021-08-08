@@ -20,13 +20,18 @@
 
 (defn make-base-step
   ([] (make-base-step nil))
-  ([opts]
-   (->> opts
-        (merge {:complete? false
-                :continue-step (fn [_ game] [true game])
-                ; :on-card-clicked (constantly nil)
-                ; :on-prompt-clicked (constantly nil)
-                :type :step/base
-                :uuid (java.util.UUID/randomUUID)})
+  ([{:keys [continue-step]}]
+   (->> {:complete? false
+         :continue-step
+         (or continue-step
+             (fn [_ game] [true game]))
+         ; :on-card-clicked (constantly nil)
+         ; :on-prompt-clicked (constantly nil)
+         :type :step/base
+         :uuid (java.util.UUID/randomUUID)}
         (map->BaseStep)
         (validate))))
+
+(defn simple-step
+  [continue-step]
+  (make-base-step {:continue-step continue-step}))

@@ -10,5 +10,11 @@
         :queue []}
    :turns 0})
 
+(defn prepare-player-deck [game player]
+  (let [deck-list (get-in game [player :deck-list])]
+    (assoc-in game [player :deck] deck-list)))
+
 (defn initialize-game [game]
-  (assoc game :phase :setup))
+  (-> game
+      (prepare-player-deck :corp)
+      (prepare-player-deck :runner)))

@@ -4,10 +4,10 @@
             [engine.player :as player]))
 
 (deftest new-game-test
-  (with-redefs
-    [player/new-corp (fn [c] c)
-     player/new-runner (fn [r] r)]
-    (testing "corp and runner are straight assignment"
+  (testing "Corp and runner functions"
+    (with-redefs
+      [player/new-corp (fn [c] c)
+       player/new-runner (fn [r] r)]
       (let [corp {:name "corp"}
             runner {:name "runner"}]
         (is (= {:corp corp
@@ -20,7 +20,7 @@
     (is (= 0 (:turns (sut/new-game {}))))))
 
 (deftest initialize-game-test
-  (is (= :setup (->> nil
-                     (sut/new-game)
-                     (sut/initialize-game)
-                     (:phase)))))
+  (is (= [:a :b :c]
+         (-> (sut/new-game {:corp {:deck [:a :b :c]}})
+             (sut/initialize-game)
+             (get-in [:corp :deck])))))

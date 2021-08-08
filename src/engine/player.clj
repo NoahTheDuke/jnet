@@ -2,8 +2,8 @@
 
 (defn new-player
   [{:keys [user identity deck]}]
-  {:deck-list deck
-   :deck deck
+  {:deck-list (or deck [])
+   :deck []
    :discard []
    :hand []
    :hand-size 5
