@@ -15,11 +15,27 @@
              (:current-phase))))
   (testing "both players shuffle their decks"
     (with-redefs [clojure.core/shuffle reverse]
-      (is (= [:c :b :a]
-             (-> (new-game {:corp {:deck [:a :b :c]}})
+      (is (= [:d :c :b :a]
+             (-> (new-game {:corp {:deck [:a :b :c :d :e :f :g :h :i]}})
                  (initialize-game)
                  (sut/setup-phase)
                  (continue-game)
                  (second)
                  (get-in [:corp :deck]))))))
-  )
+  (testing "both players draw 5 cards"
+    (is (= 5
+           (-> (new-game {:corp {:deck [:a :b :c :d :e :f :g :h :i]}})
+               (initialize-game)
+               (sut/setup-phase)
+               (continue-game)
+               (second)
+               (get-in [:corp :hand])
+               (count))))
+    (is (= 5
+           (-> (new-game {:runner {:deck [:a :b :c :d :e :f :g :h :i]}})
+               (initialize-game)
+               (sut/setup-phase)
+               (continue-game)
+               (second)
+               (get-in [:runner :hand])
+               (count))))))
