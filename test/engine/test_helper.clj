@@ -1,11 +1,9 @@
 (ns engine.test-helper
-  (:require [clojure.test :refer :all]
-            [clojure.edn :as edn]
-            [clojure.java.io :as io]))
+  (:require
+   [malli.dev :as dev]
+   [malli.dev.pretty :as pretty]))
 
-(deftest hello
-  (testing "works"
-    (is (= 2 2))))
+(dev/start! {:report (pretty/reporter)})
 
 ; (when (empty? @all-cards)
 ;   (->> (io/file "data/cards.edn")

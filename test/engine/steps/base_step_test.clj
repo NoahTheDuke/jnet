@@ -6,7 +6,7 @@
   (:import
    [engine.steps.base_step BaseStep]))
 
-(deftest base-step-tests
+(deftest base-step-test
   (is (instance? BaseStep (sut/make-base-step nil)))
   (is (thrown? clojure.lang.ExceptionInfo (validate (sut/map->BaseStep {}))))
   (let [continue-fn (constantly [true false])

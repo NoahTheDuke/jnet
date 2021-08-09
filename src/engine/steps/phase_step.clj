@@ -1,10 +1,10 @@
 (ns engine.steps.phase-step
   (:require
-    [engine.steps.step-protocol :refer [validate IStep]]
-    [engine.steps.base-step-schema :refer [BaseStepSchema]]
-    [malli.error :as me]
-    [malli.util :as mu]
-    [malli.core :as m]))
+   [engine.steps.base-step :refer [BaseStepSchema default-continue-step]]
+   [engine.steps.step-protocol :refer [Step validate]]
+   [malli.core :as m]
+   [malli.error :as me]
+   [malli.util :as mu]))
 
 (def PhaseStepSchema
   (mu/merge
@@ -17,7 +17,7 @@
 
 (defrecord PhaseStep
   [complete? continue-step type uuid]
-  IStep
+  Step
   (continue-step [this state] (continue-step this state))
   (complete? [this] (:complete? this))
   ; (on-card-clicked [_this _game _player _card])
@@ -33,8 +33,7 @@
   ([] (make-phase-step nil))
   ([{:keys [continue-step phase]}]
    (->> {:complete? false
-         :continue-step (or continue-step
-                            (fn [_ game] [true game]))
+         :continue-step (or continue-step default-continue-step)
          ; :on-card-clicked (constantly nil)
          ; :on-prompt-clicked (constantly nil)
          :phase (or phase :phase/base)

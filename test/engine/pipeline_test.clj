@@ -30,7 +30,7 @@
                 (sut/queue-step step)
                 (get-in [:gp :queue])))))
     (testing "Step must be valid"
-      (is (thrown? clojure.lang.ExceptionInfo (:gp (sut/queue-step game {})))))))
+      (is (thrown? clojure.lang.ExceptionInfo (sut/queue-step game {}))))))
 
 (deftest get-current-step-test
   (let [step (make-base-step)

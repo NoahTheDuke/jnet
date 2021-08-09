@@ -1,7 +1,7 @@
 (ns engine.steps.step-protocol)
 
-(defprotocol IStep
-  "Protocol for all steps. If a function operates on a step direclty,
+(defprotocol Step
+  "Base protocol for all steps. If a function operates on a step directly,
   even if it takes other args (such as the game state), it should be listed here
   and implemented for all steps."
   (continue-step [this game] "Calls the :continue function on the step. Should provide wrapping functionality in the protocol implementation.")
@@ -22,7 +22,7 @@
   [this]
   (throw (ex-info (str "Step <" this "> is not a valid step") {:step this})))
 
-(extend-protocol IStep
+(extend-protocol Step
   Object
   (continue-step [this game] (default-continue-step this game))
   (complete? [this] (default-complete? this))

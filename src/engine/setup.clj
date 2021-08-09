@@ -10,17 +10,19 @@
                 (update-in [:corp :deck] shuffle)
                 (update-in [:runner :deck] shuffle))])))
 
+(defn draw
+  [game player amount]
+  (let [[drawn deck] (split-at amount (get-in game [player :deck]))]
+    (-> game
+        (update-in [player :hand] into drawn)
+        (assoc-in [player :deck] (into [] deck)))))
+
 (defn draw-initial-hands []
   (simple-step
     (fn [_this game]
-      (let [[starting-corp corp-deck] (split-at 5 (get-in game [:corp :deck]))
-            [starting-runner runner-deck] (split-at 5 (get-in game [:runner :deck]))]
-        [true
-         (-> game
-             (update-in [:corp :hand] #(into [] (apply conj % starting-corp)))
-             (assoc-in [:corp :deck] (into [] corp-deck))
-             (update-in [:runner :hand] #(into [] (apply conj % starting-runner)))
-             (assoc-in [:runner :deck] (into [] runner-deck)))]))))
+      [true (-> game
+                (draw :corp 5)
+                (draw :runner 5))])))
 
 (defn setup-phase
   [game]

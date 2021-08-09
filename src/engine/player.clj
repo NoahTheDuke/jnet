@@ -9,10 +9,10 @@
    :hand-size 5
    :identity identity
    :play-area []
-   :prompt {:select-card false
-            :menu-title ""
-            :prompt-title ""
-            :buttons []}
+   :prompt-state {:select-card false
+                  :header ""
+                  :text ""
+                  :buttons []}
    :rfg []
    :scored []
    :set-aside []

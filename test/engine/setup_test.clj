@@ -14,7 +14,7 @@
              (second)
              (:current-phase))))
   (testing "both players shuffle their decks"
-    (with-redefs [clojure.core/shuffle reverse]
+    (with-redefs [clojure.core/shuffle (comp #(into [] %) reverse)]
       (is (= [:d :c :b :a]
              (-> (new-game {:corp {:deck [:a :b :c :d :e :f :g :h :i]}})
                  (initialize-game)
@@ -38,4 +38,14 @@
                (continue-game)
                (second)
                (get-in [:runner :hand])
-               (count))))))
+               (count)))))
+  ; (testing "corp has mulligan prompt"
+  ;   (is (= "Mulligan"
+  ;          (-> (new-game {:corp {:deck [:a :b :c]}})
+  ;              (initialize-game)
+  ;              (sut/setup-phase)
+  ;              (continue-game)
+  ;              (second)
+  ;              (get-in [:corp :prompt-state :header]))))
+  ;   )
+  )

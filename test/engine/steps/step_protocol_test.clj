@@ -10,7 +10,7 @@
   (is (thrown-with-msg? clojure.lang.ExceptionInfo #"Step <.*> is not a valid step" (sut/continue-step {} nil)))
   )
 
-(deftest step-protocol-complete?g-test
+(deftest step-protocol-complete?-test
   (is (thrown? clojure.lang.ExceptionInfo (sut/complete? nil)))
   (is (thrown? clojure.lang.ExceptionInfo (sut/complete? {})))
   (is (thrown-with-msg? clojure.lang.ExceptionInfo #"Step <.*> is not a valid step" (sut/complete? nil)))
