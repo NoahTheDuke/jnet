@@ -3,6 +3,8 @@
    [clojure.test :refer [deftest is testing]]
    [engine.game :refer [new-game]]
    [engine.pipeline :as sut]
+   [engine.test-helper :refer [click-prompt]]
+   [engine.steps.prompt-step :refer [prompt-step]]
    [engine.steps.base-step :refer [make-base-step]]))
 
 (deftest queue-steps-test
@@ -104,3 +106,49 @@
                    (sut/queue-step step)
                    (sut/continue-game))]
       (is (= {:pipeline [] :queue []} (:gp (second game)))))))
+
+(deftest handle-prompt-clicked-test
+  (testing "returns false by default"
+    (let [game (new-game nil)]
+      (is (= [false game] (sut/handle-prompt-clicked game :corp "button")))))
+  (testing "doesn't update the pipeline"
+    (let [step (prompt-step
+                 {:active-prompt (constantly {:text "text"})})
+          game (-> (new-game nil)
+                   (sut/queue-step step))]
+      (is (= {:pipeline [] :queue [step]}
+             (->> (sut/handle-prompt-clicked game :corp "button")
+                  (second)
+                  (:gp))))))
+  (testing "returns false if pipeline is empty"
+    (let [step (prompt-step
+                 {:active-prompt (constantly {:text "text"})})
+          game (-> (new-game nil)
+                   (sut/queue-step step))]
+      (is (false? (first (sut/handle-prompt-clicked game :corp "button"))))))
+  (testing "calls 'on-prompt-clicked' on current step"
+    (let [step (prompt-step
+                 {:active-prompt (constantly {:text "text"})
+                  :on-prompt-clicked
+                  (fn [_step _game _player _button] [:foo :bar])})
+          game (-> (new-game nil)
+                   (assoc-in [:gp :pipeline] [step]))]
+      (is (= [:foo :bar] (sut/handle-prompt-clicked game :corp "button")))))
+  (let [step (prompt-step
+               {:active-condition
+                (fn [_step _game player] (= player :corp))
+                :active-prompt (constantly {:header "Pause!"
+                                            :text "Choose!"})
+                :on-prompt-clicked
+                (fn [_step game _player _button]
+                  [true (assoc-in game [:gp :pipeline 0 :complete?] true)])})
+        game (-> (new-game nil)
+                 (sut/queue-step step)
+                 (assoc-in [:gp :queue 0 :buttons]
+                           [{:text "Button 1"}])
+                 (sut/continue-game)
+                 (second))]
+    (is (true? (-> game
+                   (click-prompt :corp "Button 1")
+                   (first))))
+    ))

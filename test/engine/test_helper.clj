@@ -1,9 +1,26 @@
 (ns engine.test-helper
   (:require
+   [clojure.string :as str]
+   [engine.pipeline :as pipeline]
    [malli.dev :as dev]
    [malli.dev.pretty :as pretty]))
 
 (dev/start! {:report (pretty/reporter)})
+
+(defn click-prompt
+  [game player button]
+  (let [prompt (get-in game [player :prompt-state])
+        foundButton (first (some #(when (= (str/lower-case button)
+                                           (str/lower-case (:text %))) %)
+                                 (:buttons prompt)))]
+    (if foundButton
+      (-> game
+          (pipeline/handle-prompt-clicked player button)
+          (second)
+          (pipeline/continue-game))
+      (throw (ex-info (str "Can't find " button
+                           " in current prompt for " player)
+                      {:data prompt})))))
 
 ; (when (empty? @all-cards)
 ;   (->> (io/file "data/cards.edn")

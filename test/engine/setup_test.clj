@@ -39,13 +39,29 @@
                (second)
                (get-in [:runner :hand])
                (count)))))
-  ; (testing "corp has mulligan prompt"
-  ;   (is (= "Mulligan"
-  ;          (-> (new-game {:corp {:deck [:a :b :c]}})
-  ;              (initialize-game)
-  ;              (sut/setup-phase)
-  ;              (continue-game)
-  ;              (second)
-  ;              (get-in [:corp :prompt-state :header]))))
-  ;   )
+  )
+
+(deftest mulligan-tests
+  (testing "mulligan prompts display correctly"
+    (let [game (-> (new-game {:corp {:deck [:a :b :c :d :e :f :g :h :i]}})
+                   (initialize-game)
+                   (sut/setup-phase)
+                   (continue-game)
+                   (second))]
+      (is (= {:header "Mulligan"
+              :text "Keep or mulligan this hand?"}
+             (-> game
+                 (get-in [:corp :prompt-state])
+                 (select-keys [:header :text]))))
+      (is (= {:header ""
+              :text "Waiting for opponent"}
+             (-> game
+                 (get-in [:runner :prompt-state])
+                 (select-keys [:header :text]))))
+      ; (is (= {:header ""
+      ;         :text "Waiting for opponent"}
+      ;        (-> game
+      ;            (click-prompt :corp "Keep")
+      ;            )))
+      ))
   )

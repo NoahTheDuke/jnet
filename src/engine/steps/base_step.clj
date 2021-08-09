@@ -5,13 +5,16 @@
     [malli.error :as me]))
 
 (def BaseStepSchema
-  [:map {:closed true}
-   [:complete? boolean?]
-   [:continue-step [:=> [:cat :map :map] [:cat :boolean :any]]]
-   ; [:on-card-clicked [:=> [:cat :map] [:boolean any?]]]
-   ; [:on-prompt-clicked [:=> [:cat :map] [:boolean any?]]]
-   [:type [:qualified-keyword {:namespace :step}]]
-   [:uuid uuid?]])
+  [:schema
+   {:registry
+    {::base-step
+     [:map {:closed true}
+      [:complete? boolean?]
+      [:continue-step [:=> [:cat [:ref ::base-step] :map]
+                       [:cat :boolean :any]]]
+      [:type [:qualified-keyword {:namespace :step}]]
+      [:uuid uuid?]]}}
+   ::base-step])
 
 (def validate-base-step (m/validator BaseStepSchema))
 (def explain-base-step (m/explainer BaseStepSchema))
@@ -21,8 +24,7 @@
   Step
   (continue-step [this state] (continue-step this state))
   (complete? [this] (:complete? this))
-  ; (on-card-clicked [_this _game _player _card])
-  ; (on-prompt-clicked [_this _game _arg])
+  (on-prompt-clicked [_this game _player _arg] [false game])
   (validate [this]
     (if (validate-base-step this)
       this
@@ -37,8 +39,6 @@
   ([{:keys [continue-step]}]
    (->> {:complete? false
          :continue-step (or continue-step default-continue-step)
-         ; :on-card-clicked (constantly nil)
-         ; :on-prompt-clicked (constantly nil)
          :type :step/base
          :uuid (java.util.UUID/randomUUID)}
         (map->BaseStep)

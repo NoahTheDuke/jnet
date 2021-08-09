@@ -1,12 +1,13 @@
 (ns engine.steps.prompt-step
   "Prompt Steps are steps that "
   (:require
+   [engine.player :refer [clear-player-prompt set-player-prompt]]
    [engine.steps.base-step :refer [BaseStepSchema]]
    [engine.steps.step-protocol :refer [Step complete? validate]]
-   [engine.player :refer [clear-player-prompt set-player-prompt]]
    [malli.core :as m]
    [malli.error :as me]
    [malli.util :as mu]))
+
 
 (def PromptStepSchema
   (mu/merge
@@ -14,18 +15,20 @@
     [:map {:closed true}
      [:active-condition [:=> [:cat BaseStepSchema :map :keyword] :boolean]]
      [:active-prompt [:=> [:cat BaseStepSchema :map :keyword] :any]]
-     [:waiting-prompt [:=> [:cat BaseStepSchema :map :keyword] :any]]]))
+     [:waiting-prompt [:=> [:cat BaseStepSchema :map :keyword] :any]]
+     [:on-prompt-clicked [:=> [:cat BaseStepSchema :map [:enum :corp :runner] :string]
+                          [:cat :boolean :any]]]]))
 
 (def validate-prompt-step (m/validator PromptStepSchema))
 (def explain-prompt-step (m/explainer PromptStepSchema))
 
 (defrecord PromptStep
-  [complete? continue-step type uuid]
+  [complete? on-prompt-clicked continue-step type uuid]
   Step
   (continue-step [this game] (continue-step this game))
   (complete? [this] (:complete? this))
-  ; (on-card-clicked [_this _game _player _card])
-  ; (on-prompt-clicked [_this _game _arg])
+  (on-prompt-clicked [this game player arg]
+    (on-prompt-clicked this game player arg))
   (validate [this]
     (if (validate-prompt-step this)
       this
@@ -33,9 +36,17 @@
         (throw (ex-info (str "Prompt step isn't valid: " (pr-str (me/humanize explained-error)))
                         (select-keys explained-error [:errors])))))))
 
+(defn bind-buttons
+  [step prompt]
+  (if-let [buttons (:buttons step)]
+    (assoc prompt :buttons buttons)
+    prompt))
+
 (defn set-active-prompt
   [game player {:keys [active-prompt] :as this}]
-  (update game player set-player-prompt (active-prompt this game player)))
+  (->> (active-prompt this game player)
+       (bind-buttons this)
+       (update game player set-player-prompt)))
 
 (defn set-waiting-prompt
   [game player {:keys [waiting-prompt] :as this}]
@@ -65,19 +76,17 @@
 
 (def default-waiting-prompt {:text "Waiting for opponent"})
 
-(defn make-prompt-step
-  ([] (make-prompt-step nil))
-  ([{:keys [active-condition active-prompt waiting-prompt]}]
-   (->> {:active-condition (or active-condition
-                               (fn [_this _game _player] true))
-         :active-prompt (or active-prompt
-                            (fn [_this _game _player] nil))
-         :waiting-prompt (or waiting-prompt
-                             (fn [_this _game _player] default-waiting-prompt))
+(defn prompt-step
+  ([] (prompt-step nil))
+  ([{:keys [active-condition active-prompt waiting-prompt
+            on-prompt-clicked]}]
+   (->> {:active-condition (or active-condition (constantly true))
+         :active-prompt active-prompt
+         :waiting-prompt (or waiting-prompt (constantly default-waiting-prompt))
          :complete? false
          :continue-step prompt-continue-step
-         ; :on-card-clicked (constantly nil)
-         ; :on-prompt-clicked (constantly nil)
+         :on-prompt-clicked (or on-prompt-clicked
+                                (fn [_this game _player _arg] [false game]))
          :type :step/prompt
          :uuid (java.util.UUID/randomUUID)}
         (map->PromptStep)

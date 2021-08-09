@@ -8,26 +8,31 @@
   (complete? [this] "Is the step complete?")
   (validate [this] "Validation through an external malli schema.")
   ; (on-card-clicked [this game player card] "What should happen when a card is clicked.")
-  ; (on-prompt-clicked [this game arg] "What should happen when a button on a prompt is clicked.")
-  )
+  (on-prompt-clicked [this game player arg] "What should happen when a button on a prompt is clicked."))
 
 (defn ^:private default-continue-step
-  [this game]
-  (throw (ex-info (str "Step <" this "> is not a valid step") {:step this
-                                                               :game game})))
+  [this]
+  (throw (ex-info (str "Step <" this "> is not a valid step") {:step this})))
 (defn ^:private default-complete?
   [this]
   (throw (ex-info (str "Step <" this "> is not a valid step") {:step this})))
 (defn ^:private default-validate
   [this]
   (throw (ex-info (str "Step <" this "> is not a valid step") {:step this})))
+(defn ^:private default-on-prompt-clicked
+  [this]
+  (throw (ex-info (str "Step <" this "> is not a valid step") {:step this})))
 
 (extend-protocol Step
   Object
-  (continue-step [this game] (default-continue-step this game))
+  (continue-step [this _game] (default-continue-step this))
   (complete? [this] (default-complete? this))
   (validate [this] (default-validate this))
+  (on-card-clicked [this _game _player _arg]
+    (default-on-prompt-clicked this))
   nil
-  (continue-step [this game] (default-continue-step this game))
+  (continue-step [this _game] (default-continue-step this))
   (complete? [this] (default-complete? this))
-  (validate [this] (default-validate this)))
+  (validate [this] (default-validate this))
+  (on-card-clicked [this _game _player _arg]
+    (default-on-prompt-clicked this)))

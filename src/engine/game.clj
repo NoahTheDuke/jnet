@@ -1,5 +1,6 @@
 (ns engine.game
-  (:require [engine.player :refer [new-corp new-runner]]))
+  (:require
+   [engine.player :refer [new-corp new-runner]]))
 
 (defn new-game
   [{:keys [corp runner]

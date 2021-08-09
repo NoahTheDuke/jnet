@@ -1,7 +1,7 @@
 (ns engine.pipeline
   (:require
    [com.rpl.specter :refer [AFTER-ELEM ALL BEGINNING FIRST NONE select setval]]
-   [engine.steps.step-protocol :refer [continue-step validate]]))
+   [engine.steps.step-protocol :refer [continue-step on-prompt-clicked validate]]))
 
 (defn queue-step
   [game step]
@@ -32,3 +32,9 @@
           (recur (drop-current-step new-game))
           [false new-game]))
       [true game])))
+
+(defn handle-prompt-clicked
+  [game player button]
+  (if-let [step (get-current-step game)]
+    (on-prompt-clicked step game player button)
+    [false game]))

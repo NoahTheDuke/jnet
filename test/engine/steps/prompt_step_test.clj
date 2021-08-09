@@ -19,21 +19,22 @@
                   :active-prompt active-prompt
                   :waiting-prompt waiting-prompt
                   :type :step/prompt}
-                 (sut/make-prompt-step)
+                 (sut/prompt-step)
                  (select-keys [:active-condition :active-prompt
                                :waiting-prompt :type])))))
     (testing "waiting-prompt has a default"
-      (is (= ((:waiting-prompt (sut/make-prompt-step)) nil nil nil)
+      (is (= ((:waiting-prompt (sut/prompt-step {:active-prompt (constantly {:title "yes"})}))
+              nil nil nil)
              {:text "Waiting for opponent"})))))
 
 (deftest step-functions-test
     (let [active-prompt {:header "Example header"
                          :text "Example text"}
           waiting-prompt {:text "Waiting text"}
-          step (sut/make-prompt-step
+          step (sut/prompt-step
                  {:active-condition (fn [_this _game player] (= :corp player))
-                  :active-prompt (fn [_this _game _player] active-prompt)
-                  :waiting-prompt (fn [_this _game _player] waiting-prompt)})
+                  :active-prompt (constantly active-prompt)
+                  :waiting-prompt (constantly waiting-prompt)})
           game (new-game {})]
       (testing "active-condition checks the player arg"
         (is ((:active-condition step) step game :corp))
@@ -50,10 +51,10 @@
     (let [active-prompt {:header "Example header"
                          :text "Example text"}
           waiting-prompt {:text "Waiting text"}
-          step (sut/make-prompt-step
+          step (sut/prompt-step
                  {:active-condition (fn [_this _game player] (= :corp player))
-                  :active-prompt (fn [_this _game _player] active-prompt)
-                  :waiting-prompt (fn [_this _game _player] waiting-prompt)})
+                  :active-prompt (constantly active-prompt)
+                  :waiting-prompt (constantly waiting-prompt)})
           game (new-game nil)
           {:keys [corp runner] :as new-game} (sut/set-prompt step game)]
       (is (not= game new-game))
@@ -65,9 +66,9 @@
   (testing "continue calls into set-prompt"
     (let [active-prompt {:header "Example header"
                          :text "Example text"}
-          step (sut/make-prompt-step
+          step (sut/prompt-step
                  {:active-condition (fn [_this _game player] (= :corp player))
-                  :active-prompt (fn [_this _game _player] active-prompt)})
+                  :active-prompt (constantly active-prompt)})
           {:keys [corp runner]} (-> (new-game {})
                                     (queue-step step)
                                     (continue-game)
@@ -78,9 +79,9 @@
   (testing "player prompts are restored after step is complete"
     (let [active-prompt {:header "Example header"
                          :text "Example text"}
-          step (sut/make-prompt-step
+          step (sut/prompt-step
                  {:active-condition (fn [_this _game player] (= :corp player))
-                  :active-prompt (fn [_this _game _player] active-prompt)})
+                  :active-prompt (constantly active-prompt)})
           {:keys [corp runner]} (-> (new-game {})
                                     (queue-step step)
                                     (assoc-in [:gp :queue 0 :complete?] true)

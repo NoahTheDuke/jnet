@@ -20,8 +20,7 @@
   Step
   (continue-step [this state] (continue-step this state))
   (complete? [this] (:complete? this))
-  ; (on-card-clicked [_this _game _player _card])
-  ; (on-prompt-clicked [_this _game _arg])
+  (on-prompt-clicked [_this game _player _arg] [false game])
   (validate [this]
     (if (validate-phase-step this)
       this
@@ -34,8 +33,6 @@
   ([{:keys [continue-step phase]}]
    (->> {:complete? false
          :continue-step (or continue-step default-continue-step)
-         ; :on-card-clicked (constantly nil)
-         ; :on-prompt-clicked (constantly nil)
          :phase (or phase :phase/base)
          :type :step/phase
          :uuid (java.util.UUID/randomUUID)}
