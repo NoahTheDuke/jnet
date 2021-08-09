@@ -28,7 +28,7 @@
       this
       (let [explained-error (explain-base-step (into {} this))]
         (throw (ex-info (str "Base step isn't valid: " (pr-str (me/humanize explained-error)))
-                        explained-error))))))
+                        (select-keys explained-error [:errors])))))))
 
 (defn default-continue-step [_step game] [true game])
 

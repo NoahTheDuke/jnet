@@ -2,7 +2,7 @@
   (:require
    [clojure.test :refer [deftest is testing]]
    [engine.game :refer [new-game]]
-   [engine.pipeline :refer [get-current-step continue-game queue-step]]
+   [engine.pipeline :refer [continue-game queue-step]]
    [engine.steps.prompt-step :as sut]
    [engine.test-helper]))
 

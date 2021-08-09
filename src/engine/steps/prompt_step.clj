@@ -3,6 +3,7 @@
   (:require
    [engine.steps.base-step :refer [BaseStepSchema]]
    [engine.steps.step-protocol :refer [Step complete? validate]]
+   [engine.player :refer [clear-player-prompt set-player-prompt]]
    [malli.core :as m]
    [malli.error :as me]
    [malli.util :as mu]))
@@ -33,32 +34,26 @@
                         (select-keys explained-error [:errors])))))))
 
 (defn set-active-prompt
-  [game {active-prompt :active-prompt :as this} player]
-  (assoc-in game [player :prompt-state] (active-prompt this game player)))
+  [game player {:keys [active-prompt] :as this}]
+  (update game player set-player-prompt (active-prompt this game player)))
 
 (defn set-waiting-prompt
-  [game {waiting-prompt :waiting-prompt :as this} player]
-  (assoc-in game [player :prompt-state] (waiting-prompt this game player)))
+  [game player {:keys [waiting-prompt] :as this}]
+  (update game player set-player-prompt (waiting-prompt this game player)))
 
 (defn set-prompt
   [{:keys [active-condition] :as this} game]
   (let [[active-player waiting-player]
         (if (active-condition this game :corp) [:corp :runner] [:runner :corp])]
     (-> game
-        (set-active-prompt this active-player)
-        (set-waiting-prompt this waiting-player))))
+        (set-active-prompt active-player this)
+        (set-waiting-prompt waiting-player this))))
 
 (defn clear-prompt
   [game]
   (-> game
-      (assoc-in [:corp :prompt-state] {:select-card false
-                                       :header ""
-                                       :text ""
-                                       :buttons []})
-      (assoc-in [:runner :prompt-state] {:select-card false
-                                         :header ""
-                                         :text ""
-                                         :buttons []})))
+      (update :corp clear-player-prompt)
+      (update :runner clear-player-prompt)))
 
 (defn prompt-continue-step
   [this game]
