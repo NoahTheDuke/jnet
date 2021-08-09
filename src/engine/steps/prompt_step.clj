@@ -12,9 +12,9 @@
   (mu/merge
     BaseStepSchema
     [:map {:closed true}
-     [:active-condition [:=> [:cat :map :map :keyword] :boolean]]
-     [:active-prompt [:=> [:cat :map :map :keyword] :any]]
-     [:waiting-prompt [:=> [:cat :map :map :keyword] :any]]]))
+     [:active-condition [:=> [:cat BaseStepSchema :map :keyword] :boolean]]
+     [:active-prompt [:=> [:cat BaseStepSchema :map :keyword] :any]]
+     [:waiting-prompt [:=> [:cat BaseStepSchema :map :keyword] :any]]]))
 
 (def validate-prompt-step (m/validator PromptStepSchema))
 (def explain-prompt-step (m/explainer PromptStepSchema))
@@ -68,9 +68,12 @@
 (defn make-prompt-step
   ([] (make-prompt-step nil))
   ([{:keys [active-condition active-prompt waiting-prompt]}]
-   (->> {:active-condition (or active-condition (constantly true))
-         :active-prompt (or active-prompt (constantly nil))
-         :waiting-prompt (or waiting-prompt (constantly default-waiting-prompt))
+   (->> {:active-condition (or active-condition
+                               (fn [_this _game _player] true))
+         :active-prompt (or active-prompt
+                            (fn [_this _game _player] nil))
+         :waiting-prompt (or waiting-prompt
+                             (fn [_this _game _player] default-waiting-prompt))
          :complete? false
          :continue-step prompt-continue-step
          ; :on-card-clicked (constantly nil)
@@ -79,67 +82,3 @@
          :uuid (java.util.UUID/randomUUID)}
         (map->PromptStep)
         (validate))))
-
-; (def ButtonSchema
-;   [:map
-;    [:text string?]
-;    [:command string?]
-;    [:uuid uuid?]])
-
-; (def PromptSchema
-;   [:map
-;    [:msg string?]
-;    [:buttons [:* ButtonSchema]]
-;    [:effect [:fn fn?]]
-;    [:card map?]
-;    [:prompt-type keyword?]
-;    [:show-discard boolean?]])
-
-; (def validate-prompt (m/validator PromptSchema))
-
-; (defn clear-prompt
-;   [state]
-;   (doseq [player [:corp :runner]]
-;     (swap! state assoc-in [player :prompt-state] {})))
-
-; (defn add-default-commands-to-buttons
-;   [prompt]
-;   (let [button-fn (fn [button]
-;                     (assoc button
-;                            :command (:command button :button)
-;                            :uuid (:uuid prompt)))
-;         buttons (mapv button-fn (:buttons prompt))]
-;     (when (seq buttons)
-;       (assoc prompt :buttons buttons))))
-
-; (defn set-prompt
-;   [step state]
-;   (let [active-player (:active-player @step)
-;         active-prompt (:active-prompt @step)
-;         waiting-prompt (:waiting-prompt @step)]
-;     (doseq [player [:corp :runner]]
-;       (if (= player active-player)
-;         (let [prompt (add-default-commands-to-buttons (active-prompt state))]
-;           (assert (validate-prompt prompt) "Active prompt isn't valid")
-;           (swap! state assoc-in [player :prompt-state] prompt))
-;         (let [prompt (waiting-prompt state)]
-;           (assert (validate-prompt prompt) "Waiting prompt isn't valid")
-;           (swap! state assoc-in [player :prompt-state] prompt))))))
-
-; (defn default-prompt-continue
-;   [step & state]
-;   (if (complete? step)
-;       (do (clear-prompt state)
-;           true)
-;       (do (set-prompt step state)
-;           false)))
-
-; (defn ->PromptStep
-;   "A step that displays a prompt to a given player"
-;   [player active-prompt waiting-prompt]
-;   (let [step (make-base-step :step/prompt default-prompt-continue)]
-;     (vswap! step assoc
-;             :active-player player
-;             :active-prompt active-prompt
-;             :waiting-prompt waiting-prompt)
-;     (validate-step step)))
