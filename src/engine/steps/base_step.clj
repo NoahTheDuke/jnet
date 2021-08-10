@@ -9,7 +9,6 @@
    {:registry
     {::base-step
      [:map {:closed true}
-      [:complete? boolean?]
       [:continue-step [:=> [:cat [:ref ::base-step] :map]
                        [:cat :boolean :any]]]
       [:type [:qualified-keyword {:namespace :step}]]
@@ -20,10 +19,10 @@
 (def explain-base-step (m/explainer BaseStepSchema))
 
 (defrecord BaseStep
-  [complete? continue-step type uuid]
+  [continue-step type uuid]
   Step
   (continue-step [this state] (continue-step this state))
-  (complete? [this] (:complete? this))
+  (complete? [_])
   (on-prompt-clicked [_this game _player _arg] [false game])
   (validate [this]
     (if (validate-base-step this)
@@ -37,8 +36,7 @@
 (defn make-base-step
   ([] (make-base-step nil))
   ([{:keys [continue-step]}]
-   (->> {:complete? false
-         :continue-step (or continue-step default-continue-step)
+   (->> {:continue-step (or continue-step default-continue-step)
          :type :step/base
          :uuid (java.util.UUID/randomUUID)}
         (map->BaseStep)

@@ -13,6 +13,7 @@
   (mu/merge
     BaseStepSchema
     [:map {:closed true}
+     [:complete? boolean?]
      [:active-condition [:=> [:cat BaseStepSchema :map :keyword] :boolean]]
      [:active-prompt [:=> [:cat BaseStepSchema :map :keyword] :any]]
      [:waiting-prompt [:=> [:cat BaseStepSchema :map :keyword] :any]]
@@ -74,20 +75,18 @@
                (set-prompt this game))]
     [completed game]))
 
-(def default-waiting-prompt {:text "Waiting for opponent"})
-
 (defn prompt-step
-  ([] (prompt-step nil))
-  ([{:keys [active-condition active-prompt waiting-prompt
-            on-prompt-clicked]}]
-   (->> {:active-condition (or active-condition (constantly true))
-         :active-prompt active-prompt
-         :waiting-prompt (or waiting-prompt (constantly default-waiting-prompt))
-         :complete? false
-         :continue-step prompt-continue-step
-         :on-prompt-clicked (or on-prompt-clicked
-                                (fn [_this game _player _arg] [false game]))
-         :type :step/prompt
-         :uuid (java.util.UUID/randomUUID)}
-        (map->PromptStep)
-        (validate))))
+  [{:keys [active-condition active-prompt waiting-prompt
+           on-prompt-clicked]}]
+  (->> {:active-condition (or active-condition (constantly true))
+        :active-prompt active-prompt
+        :waiting-prompt (or waiting-prompt
+                            (constantly {:text "Waiting for opponent"}))
+        :complete? false
+        :continue-step prompt-continue-step
+        :on-prompt-clicked (or on-prompt-clicked
+                               (fn [_this game _player _arg] [false game]))
+        :type :step/prompt
+        :uuid (java.util.UUID/randomUUID)}
+       (map->PromptStep)
+       (validate)))

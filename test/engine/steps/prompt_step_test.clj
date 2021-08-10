@@ -89,5 +89,4 @@
                                     (second))]
       (is (= "" (get-in corp [:prompt-state :header])))
       (is (= "" (get-in corp [:prompt-state :text])))
-      (is (= "" (get-in runner [:prompt-state :text])))))
-  )
+      (is (= "" (get-in runner [:prompt-state :text]))))))

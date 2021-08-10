@@ -38,8 +38,7 @@
                (continue-game)
                (second)
                (get-in [:runner :hand])
-               (count)))))
-  )
+               (count))))))
 
 (deftest mulligan-tests
   (testing "mulligan prompts display correctly"

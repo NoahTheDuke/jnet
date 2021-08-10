@@ -16,10 +16,10 @@
 (def explain-phase-step (m/explainer PhaseStepSchema))
 
 (defrecord PhaseStep
-  [complete? continue-step type uuid]
+  [continue-step type uuid]
   Step
   (continue-step [this state] (continue-step this state))
-  (complete? [this] (:complete? this))
+  (complete? [_])
   (on-prompt-clicked [_this game _player _arg] [false game])
   (validate [this]
     (if (validate-phase-step this)
@@ -31,8 +31,7 @@
 (defn make-phase-step
   ([] (make-phase-step nil))
   ([{:keys [continue-step phase]}]
-   (->> {:complete? false
-         :continue-step (or continue-step default-continue-step)
+   (->> {:continue-step (or continue-step default-continue-step)
          :phase (or phase :phase/base)
          :type :step/phase
          :uuid (java.util.UUID/randomUUID)}
