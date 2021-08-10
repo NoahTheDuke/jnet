@@ -23,7 +23,8 @@
                  (select-keys [:active-condition :active-prompt
                                :waiting-prompt :type])))))
     (testing "waiting-prompt has a default"
-      (is (= ((:waiting-prompt (sut/prompt-step {:active-prompt (constantly {:title "yes"})}))
+      (is (= ((:waiting-prompt (sut/prompt-step {:active-condition :corp
+                                                 :active-prompt (constantly {:title "yes"})}))
               nil nil nil)
              {:text "Waiting for opponent"})))))
 
@@ -32,7 +33,7 @@
                          :text "Example text"}
           waiting-prompt {:text "Waiting text"}
           step (sut/prompt-step
-                 {:active-condition (fn [_this _game player] (= :corp player))
+                 {:active-condition :corp
                   :active-prompt (constantly active-prompt)
                   :waiting-prompt (constantly waiting-prompt)})
           game (new-game {})]
@@ -52,7 +53,7 @@
                          :text "Example text"}
           waiting-prompt {:text "Waiting text"}
           step (sut/prompt-step
-                 {:active-condition (fn [_this _game player] (= :corp player))
+                 {:active-condition :corp
                   :active-prompt (constantly active-prompt)
                   :waiting-prompt (constantly waiting-prompt)})
           game (new-game nil)
@@ -67,7 +68,7 @@
     (let [active-prompt {:header "Example header"
                          :text "Example text"}
           step (sut/prompt-step
-                 {:active-condition (fn [_this _game player] (= :corp player))
+                 {:active-condition :corp
                   :active-prompt (constantly active-prompt)})
           {:keys [corp runner]} (-> (new-game {})
                                     (queue-step step)
@@ -80,7 +81,7 @@
     (let [active-prompt {:header "Example header"
                          :text "Example text"}
           step (sut/prompt-step
-                 {:active-condition (fn [_this _game player] (= :corp player))
+                 {:active-condition :corp
                   :active-prompt (constantly active-prompt)})
           {:keys [corp runner]} (-> (new-game {})
                                     (queue-step step)

@@ -3,7 +3,8 @@
    [clojure.test :refer [deftest is testing]]
    [engine.game :refer [initialize-game new-game]]
    [engine.pipeline :refer [continue-game]]
-   [engine.setup :as sut]))
+   [engine.setup :as sut]
+   [engine.test-helper :refer [click-prompt]]))
 
 (deftest setup-test
   (is (= :phase/setup
@@ -48,19 +49,36 @@
                    (continue-game)
                    (second))]
       (is (= {:header "Mulligan"
-              :text "Keep or mulligan this hand?"}
+              :text "Keep or mulligan this hand?"
+              :buttons [{:text "Keep"
+                         :arg "keep"}
+                        {:text "Mulligan"
+                         :arg "mulligan"}]}
              (-> game
                  (get-in [:corp :prompt-state])
-                 (select-keys [:header :text]))))
+                 (select-keys [:header :text :buttons]))))
       (is (= {:header ""
-              :text "Waiting for opponent"}
+              :text "Waiting for opponent"
+              :buttons []}
              (-> game
                  (get-in [:runner :prompt-state])
-                 (select-keys [:header :text]))))
-      ; (is (= {:header ""
-      ;         :text "Waiting for opponent"}
-      ;        (-> game
-      ;            (click-prompt :corp "Keep")
-      ;            )))
-      ))
-  )
+                 (select-keys [:header :text :buttons]))))
+      (is (= {:header "Mulligan"
+              :text "Keep or mulligan this hand?"
+              :buttons [{:text "Keep"
+                         :arg "keep"}
+                        {:text "Mulligan"
+                         :arg "mulligan"}]}
+             (-> game
+                 (click-prompt :corp "Keep")
+                 (second)
+                 (get-in [:runner :prompt-state])
+                 (select-keys [:header :text :buttons]))))
+      (is (= {:header ""
+              :text "Waiting for opponent"
+              :buttons []}
+             (-> game
+                 (click-prompt :corp "Keep")
+                 (second)
+                 (get-in [:corp :prompt-state])
+                 (select-keys [:header :text :buttons])))))))

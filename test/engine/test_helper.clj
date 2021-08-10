@@ -10,12 +10,12 @@
 (defn click-prompt
   [game player button]
   (let [prompt (get-in game [player :prompt-state])
-        foundButton (first (some #(when (= (str/lower-case button)
-                                           (str/lower-case (:text %))) %)
-                                 (:buttons prompt)))]
+        foundButton (some #(when (= (str/lower-case button)
+                                    (str/lower-case (:text %))) %)
+                          (:buttons prompt))]
     (if foundButton
       (-> game
-          (pipeline/handle-prompt-clicked player button)
+          (pipeline/handle-prompt-clicked player (:arg foundButton))
           (second)
           (pipeline/continue-game))
       (throw (ex-info (str "Can't find " button

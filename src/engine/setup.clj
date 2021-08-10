@@ -1,8 +1,8 @@
 (ns engine.setup
   (:require
    [engine.pipeline :refer [queue-step]]
-   [engine.steps.prompt-step :refer [prompt-step]]
-   [engine.steps.base-step :refer [simple-step]]))
+   [engine.steps.base-step :refer [simple-step]]
+   [engine.steps.prompt-step :refer [prompt-step]]))
 
 (defn setup-begin []
   (simple-step
@@ -25,12 +25,30 @@
                 (draw :corp 5)
                 (draw :runner 5))])))
 
-(defn corp-mulligan-prompt []
+(defn mulligan-prompt [player]
   (prompt-step
-    {:active-condition (fn [_this _game player] (= :corp player))
-     :active-prompt (fn [_this _game _player]
-                      {:header "Mulligan"
-                       :text "Keep or mulligan this hand?"})}))
+    {:active-condition player
+     :active-prompt
+     (fn [_this _game _player]
+       {:header "Mulligan"
+        :text "Keep or mulligan this hand?"
+        :buttons [{:text "Keep" :arg "keep"}
+                  {:text "Mulligan" :arg "mulligan"}]})
+     :on-prompt-clicked
+     (fn [_this game _player arg]
+       (let [game (assoc-in game [:gp :pipeline 0 :complete?] true)]
+         [true
+          (if (= arg "keep")
+            game
+            (let [hand (get-in game [player :hand])
+                  deck (get-in game [player :deck])
+                  new-deck (->> deck
+                                (concat hand)
+                                (shuffle)
+                                (into []))]
+              (-> game
+                  (assoc [player :deck] new-deck)
+                  (draw player 5))))]))}))
 
 (defn setup-phase
   [game]
@@ -38,5 +56,5 @@
       (assoc :current-phase :phase/setup)
       (queue-step (setup-begin))
       (queue-step (draw-initial-hands))
-      (queue-step (corp-mulligan-prompt))
-      ))
+      (queue-step (mulligan-prompt :corp))
+      (queue-step (mulligan-prompt :runner))))

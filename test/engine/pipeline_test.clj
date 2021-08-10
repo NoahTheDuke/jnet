@@ -113,7 +113,8 @@
       (is (= [false game] (sut/handle-prompt-clicked game :corp "button")))))
   (testing "doesn't update the pipeline"
     (let [step (prompt-step
-                 {:active-prompt (constantly {:text "text"})})
+                 {:active-prompt (constantly {:text "text"})
+                  :active-condition :corp})
           game (-> (new-game nil)
                    (sut/queue-step step))]
       (is (= {:pipeline [] :queue [step]}
@@ -122,21 +123,22 @@
                   (:gp))))))
   (testing "returns false if pipeline is empty"
     (let [step (prompt-step
-                 {:active-prompt (constantly {:text "text"})})
+                 {:active-prompt (constantly {:text "text"})
+                  :active-condition :corp})
           game (-> (new-game nil)
                    (sut/queue-step step))]
       (is (false? (first (sut/handle-prompt-clicked game :corp "button"))))))
   (testing "calls 'on-prompt-clicked' on current step"
     (let [step (prompt-step
                  {:active-prompt (constantly {:text "text"})
+                  :active-condition :corp
                   :on-prompt-clicked
                   (fn [_step _game _player _button] [:foo :bar])})
           game (-> (new-game nil)
                    (assoc-in [:gp :pipeline] [step]))]
       (is (= [:foo :bar] (sut/handle-prompt-clicked game :corp "button")))))
   (let [step (prompt-step
-               {:active-condition
-                (fn [_step _game player] (= player :corp))
+               {:active-condition :corp
                 :active-prompt (constantly {:header "Pause!"
                                             :text "Choose!"})
                 :on-prompt-clicked

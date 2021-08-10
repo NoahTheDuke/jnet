@@ -34,7 +34,8 @@
    :extra-deps  {com.cognitect/test-runner
                  {:git/url "https://github.com/cognitect-labs/test-runner.git"
                   :sha     "f597341b6ca7bb4cf027e0a34a6710ca9cb969da"}}
-   :main-opts   ["-m" "cognitect.test-runner"]}
+   :main-opts   ["-m" "cognitect.test-runner"]
+   :exec-fn cognitect.test-runner.api/test}
   :test/kaocha
   {:extra-paths ["test"]
    :extra-deps {lambdaisland/kaocha {:mvn/version "1.0.861"}}

@@ -8,13 +8,14 @@
    [malli.error :as me]
    [malli.util :as mu]))
 
-
 (def PromptStepSchema
   (mu/merge
     BaseStepSchema
     [:map {:closed true}
      [:complete? boolean?]
-     [:active-condition [:=> [:cat BaseStepSchema :map :keyword] :boolean]]
+     [:active-condition [:or
+                         [:enum :corp :runner]
+                         [:=> [:cat BaseStepSchema :map :keyword] :boolean]]]
      [:active-prompt [:=> [:cat BaseStepSchema :map :keyword] :any]]
      [:waiting-prompt [:=> [:cat BaseStepSchema :map :keyword] :any]]
      [:on-prompt-clicked [:=> [:cat BaseStepSchema :map [:enum :corp :runner] :string]
@@ -78,7 +79,10 @@
 (defn prompt-step
   [{:keys [active-condition active-prompt waiting-prompt
            on-prompt-clicked]}]
-  (->> {:active-condition (or active-condition (constantly true))
+  (->> {:active-condition
+        (cond
+          (fn? active-condition) active-condition
+          (keyword? active-condition) (fn [_this _game player] (= player active-condition)))
         :active-prompt active-prompt
         :waiting-prompt (or waiting-prompt
                             (constantly {:text "Waiting for opponent"}))
