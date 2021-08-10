@@ -25,6 +25,13 @@
                            " in current prompt for " player)
                       {:data prompt})))))
 
+(defn get-messages
+  "Dealing with the :date stuff is annoying so we're ignoring it here"
+  [game]
+  (->> game
+       (:messages)
+       (mapv #(dissoc % :date))))
+
 ; (defn qty [card amt]
 ;   (when (pos? amt)
 ;     (repeat amt card)))

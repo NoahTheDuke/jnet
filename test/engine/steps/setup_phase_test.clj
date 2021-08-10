@@ -1,14 +1,14 @@
 (ns engine.steps.setup-phase-test
   (:require
    [clojure.test :refer [deftest is testing]]
-   [engine.game :refer [start-new-game]]
+   [engine.game :refer [new-game]]
    [engine.pipeline :refer [continue-game]]
    [engine.steps.setup-phase :as sut]
    [engine.test-helper :refer [click-prompt]]))
 
 (deftest setup-test
   (is (= :phase/setup
-         (-> (start-new-game nil)
+         (-> (new-game nil)
              (sut/setup-phase)
              (continue-game)
              (second)
@@ -16,21 +16,21 @@
   (testing "both players shuffle their decks"
     (with-redefs [clojure.core/shuffle (comp #(into [] %) reverse)]
       (is (= [:d :c :b :a]
-             (-> (start-new-game {:corp {:deck [:a :b :c :d :e :f :g :h :i]}})
+             (-> (new-game {:corp {:deck [:a :b :c :d :e :f :g :h :i]}})
                  (sut/setup-phase)
                  (continue-game)
                  (second)
                  (get-in [:corp :deck]))))))
   (testing "both players draw 5 cards"
     (is (= 5
-           (-> (start-new-game {:corp {:deck [:a :b :c :d :e :f :g :h :i]}})
+           (-> (new-game {:corp {:deck [:a :b :c :d :e :f :g :h :i]}})
                (sut/setup-phase)
                (continue-game)
                (second)
                (get-in [:corp :hand])
                (count))))
     (is (= 5
-           (-> (start-new-game {:runner {:deck [:a :b :c :d :e :f :g :h :i]}})
+           (-> (new-game {:runner {:deck [:a :b :c :d :e :f :g :h :i]}})
                (sut/setup-phase)
                (continue-game)
                (second)
@@ -39,7 +39,7 @@
 
 (deftest mulligan-tests
   (testing "mulligan prompts display correctly"
-    (let [game (-> (start-new-game {:corp {:deck [:a :b :c :d :e :f :g :h :i]}})
+    (let [game (-> (new-game {:corp {:deck [:a :b :c :d :e :f :g :h :i]}})
                    (sut/setup-phase)
                    (continue-game)
                    (second))]

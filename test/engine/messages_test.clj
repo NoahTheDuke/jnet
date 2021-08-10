@@ -2,14 +2,8 @@
   (:require
    [clojure.test :refer [deftest is]]
    [engine.game :as game]
-   [engine.messages :as sut]))
-
-(defn get-messages
-  "Dealing with the :date stuff is annoying so we're ignoring it here"
-  [game]
-  (->> game
-       (:messages)
-       (mapv #(dissoc % :date))))
+   [engine.messages :as sut]
+   [engine.test-helper :refer [get-messages]]))
 
 (deftest chat-log-test
   (is (= [{:text ["Hello!"]}]

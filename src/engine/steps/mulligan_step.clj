@@ -1,9 +1,10 @@
 (ns engine.steps.mulligan-step
   "Creation"
   (:require
-   [engine.draw :refer [draw]]
-   [engine.pipeline :refer [complete-current-step]]
-   [engine.steps.prompt-step :refer [prompt-step]]))
+   [engine.draw :as draw]
+   [engine.messages :as msg]
+   [engine.pipeline :as ppln]
+   [engine.steps.prompt-step :as ps]))
 
 (defn mulligan-active-prompt
   [& _args]
@@ -14,7 +15,12 @@
 
 (defn mulligan-prompt-clicked
   [_this game player arg]
-  (let [game (complete-current-step game)]
+  (let [message (if (= arg "keep")
+                  "{0} has kept their hand"
+                  "{0} has taken a mulligan")
+        game (-> game
+                 (ppln/complete-current-step)
+                 (msg/add-message message [player]))]
     (if (= arg "keep")
       [true game]
       (let [hand (get-in game [player :hand])
@@ -25,10 +31,10 @@
                           (into []))]
         [true (-> game
                   (assoc [player :deck] new-deck)
-                  (draw player 5))]))))
+                  (draw/draw player 5))]))))
 
 (defn mulligan-prompt [player]
-  (prompt-step
+  (ps/prompt-step
     {:active-condition player
      :active-prompt mulligan-active-prompt
      :on-prompt-clicked mulligan-prompt-clicked}))
