@@ -12,6 +12,10 @@
   [game]
   (get-in game [:gp :pipeline 0]))
 
+(defn complete-current-step
+  [game]
+  (assoc-in game [:gp :pipeline 0 :complete?] true))
+
 (defn drop-current-step
   [game]
   (setval [:gp :pipeline FIRST] NONE game))

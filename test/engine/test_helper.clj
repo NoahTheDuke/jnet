@@ -1,11 +1,14 @@
 (ns engine.test-helper
   (:require
    [clojure.string :as str]
+   [engine.data :as data]
    [engine.pipeline :as pipeline]
    [malli.dev :as dev]
    [malli.dev.pretty :as pretty]))
 
 (dev/start! {:report (pretty/reporter)})
+
+(data/load-card-data)
 
 (defn click-prompt
   [game player button]
@@ -21,16 +24,6 @@
       (throw (ex-info (str "Can't find " button
                            " in current prompt for " player)
                       {:data prompt})))))
-
-; (when (empty? @all-cards)
-;   (->> (io/file "data/cards.edn")
-;        slurp
-;        edn/read-string
-;        merge
-;        (map (juxt :title identity))
-;        (into {})
-;        (reset! all-cards)))
-
 
 ; (defn qty [card amt]
 ;   (when (pos? amt)

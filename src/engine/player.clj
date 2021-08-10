@@ -14,10 +14,9 @@
    :rfg []
    :scored []
    :set-aside []
-   :credits 5
+   :credits 0
    :clicks 0
    :agenda-points 0
-   :ready-to-start false
    :user user})
 
 (defn new-corp [opts]

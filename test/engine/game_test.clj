@@ -15,12 +15,11 @@
                (select-keys (sut/new-game {:corp corp :runner runner})
                             [:corp :runner]))))))
   (testing "pipeline exists"
-    (is (= {:pipeline [] :queue []} (:gp (sut/new-game {})))))
-  (testing "initial turns start at 0"
-    (is (= 0 (:turns (sut/new-game {}))))))
+    (is (:gp (sut/new-game {}))))
+  (testing "initial turns set"
+    (is (:turns (sut/new-game {})))))
 
-(deftest initialize-game-test
+(deftest start-new-game
   (is (= [:a :b :c]
-         (-> (sut/new-game {:corp {:deck [:a :b :c]}})
-             (sut/initialize-game)
+         (-> (sut/start-new-game {:corp {:deck [:a :b :c]}})
              (get-in [:corp :deck])))))
