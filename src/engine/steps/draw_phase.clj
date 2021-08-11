@@ -8,13 +8,12 @@
 (defn mandatory-draw []
   (simple-step
     (fn [game]
-      (if (= :corp (:active-player game))
-        (-> game
-            (msg/add-message "{0} draws 1 card for their mandatory draw." [(:corp game)])
-            (draw/draw :corp 1))
-        game))))
+      (-> game
+          (msg/add-message "{0} draws 1 card for their mandatory draw." [(:corp game)])
+          (draw/draw :corp 1)))))
 
 (defn draw-phase []
   (phase/make-phase-step
     {:phase :draw
+     :condition (fn [game] (= :corp (:active-player game)))
      :steps [(mandatory-draw)]}))
