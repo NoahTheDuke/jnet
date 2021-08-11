@@ -17,7 +17,7 @@
    :credits 0
    :clicks 0
    :agenda-points 0
-   :user user})
+   :name (:username user)})
 
 (defn new-corp [opts]
   (merge

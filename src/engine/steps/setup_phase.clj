@@ -21,7 +21,7 @@
 
 (defn setup-phase []
   (phase/make-phase-step
-    {:phase :phase/setup
+    {:phase :setup
      :steps [(setup-begin)
              (draw-initial-hands)
              (mulligan/mulligan-prompt :corp)

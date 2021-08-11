@@ -9,7 +9,7 @@
         id {:id "Corp"}
         user {:username "Noah"}
         opts {:user user :identity id :deck deck}]
-    (is (= user (:user (sut/new-player opts))))
+    (is (= (:username user) (:name (sut/new-player opts))))
     (is (= id (:identity (sut/new-player opts))))
     (is (= deck (:deck (sut/new-player opts))))
     (is (= deck (:deck-list (sut/new-player opts))))))

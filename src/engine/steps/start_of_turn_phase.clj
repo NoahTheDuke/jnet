@@ -38,11 +38,9 @@
   * checkpoint"
   []
   (phase/make-phase-step
-    {:phase :phase/start-of-turn
+    {:phase :start-of-turn
      :steps [(gain-allotted-clicks)
              (start-of-turn-paw)
              (refill-recurring-credits)
              (trigger-start-of-turn-abilities)
-             (checkpoint)
-             (step/make-base-step
-               {:continue-step (fn [_ game] [false game])})]}))
+             (checkpoint)]}))

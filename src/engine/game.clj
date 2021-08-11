@@ -4,6 +4,7 @@
    [engine.player :as player]
    [engine.steps.step :as step]
    [engine.steps.setup-phase :as setup-phase]
+   [engine.steps.draw-phase :as draw-phase]
    [engine.steps.start-of-turn-phase :as sot-phase]))
 
 (defn new-game
@@ -26,7 +27,8 @@
         (-> game
             (assoc :active-player active-player
                    :inactive-player inactive-player)
-            (pipeline/queue-step (sot-phase/start-of-turn-phase)))))))
+            (pipeline/queue-step (sot-phase/start-of-turn-phase))
+            (pipeline/queue-step (draw-phase/draw-phase)))))))
 
 (defn start-new-game
   [opts]

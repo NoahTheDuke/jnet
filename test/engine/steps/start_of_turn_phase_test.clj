@@ -15,14 +15,6 @@
              (click-prompt :runner "Keep")
              (:active-player)))))
 
-(deftest correct-phase-test
-  (is (= :phase/start-of-turn
-         (-> (game/new-game nil)
-             (pipeline/queue-step (sut/start-of-turn-phase))
-             (pipeline/continue-game)
-             (second)
-             (:current-phase)))))
-
 (deftest gain-allotted-clicks-test
   (is (= (:clicks-per-turn (player/new-corp nil))
          (-> (game/new-game nil)

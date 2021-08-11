@@ -1,7 +1,7 @@
 (ns engine.steps.mulligan-step
   (:require
    [engine.draw :as draw]
-   [engine.messages :as message]
+   [engine.messages :as msg]
    [engine.pipeline :as pipeline]
    [engine.steps.prompt-step :as prompt-state]))
 
@@ -19,7 +19,7 @@
                   "{0} has taken a mulligan")
         game (-> game
                  (pipeline/complete-current-step)
-                 (message/add-message message [player]))]
+                 (msg/add-message message [player]))]
     (if (= arg "keep")
       [true game]
       (let [hand (get-in game [player :hand])
