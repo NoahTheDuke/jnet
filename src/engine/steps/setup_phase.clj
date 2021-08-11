@@ -7,17 +7,17 @@
 
 (defn setup-begin []
   (simple-step
-    (fn [_this game]
-      [true (-> game
-                (update-in [:corp :deck] shuffle)
-                (update-in [:runner :deck] shuffle))])))
+    (fn [game]
+      (-> game
+          (update-in [:corp :deck] shuffle)
+          (update-in [:runner :deck] shuffle)))))
 
 (defn draw-initial-hands []
   (simple-step
-    (fn [_this game]
-      [true (-> game
-                (draw :corp 5)
-                (draw :runner 5))])))
+    (fn [game]
+      (-> game
+          (draw :corp 5)
+          (draw :runner 5)))))
 
 (defn setup-phase
   [game]

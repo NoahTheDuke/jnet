@@ -2,12 +2,9 @@
   (:require
    [clojure.test :refer [deftest is]]
    [engine.steps.base-step :as sut]
-   [engine.steps.step-protocol :refer [complete? continue-step validate]])
-  (:import
-   [engine.steps.base_step BaseStep]))
+   [engine.steps.step-protocol :refer [complete? continue-step validate]]))
 
 (deftest base-step-test
-  (is (instance? BaseStep (sut/make-base-step nil)))
   (is (thrown? clojure.lang.ExceptionInfo (validate (sut/map->BaseStep {}))))
   (let [continue-fn (constantly [true false])
         step (sut/make-base-step {:continue-step continue-fn})]
@@ -21,6 +18,5 @@
 (deftest simple-step-test
   (is (= [true :foo]
          (continue-step
-           (sut/simple-step
-             (fn [_this game] [true game]))
+           (sut/simple-step (fn [game] game))
            :foo))))

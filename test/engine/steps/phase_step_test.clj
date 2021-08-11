@@ -7,38 +7,24 @@
    [engine.steps.phase-step :as sut]))
 
 (deftest initialize-steps-test
-  (let [start-step (-> sut/start-phase
-                       (base-step/simple-step)
-                       (assoc :phase :phase/base)
-                       (dissoc :uuid))
-        end-step (-> sut/end-phase
-                     (base-step/simple-step)
-                     (dissoc :uuid))]
-    (is (= [start-step end-step]
-           (->> (sut/initialize-steps nil)
-                (map #(dissoc % :uuid)))))
-    (let [extra-step (-> (constantly :foo)
-                         (base-step/simple-step)
-                         (dissoc :uuid))]
-      (is (= [start-step
-              extra-step
-              end-step]
-             (->> (sut/initialize-steps {:steps [extra-step]})
-                  (map #(dissoc % :uuid))))))))
+  (is (= 2 (count (sut/initialize-steps nil))))
+  (is (= 3 (count (sut/initialize-steps
+                    {:steps [(base-step/simple-step (constantly :foo))]})))))
 
 (deftest queue-steps-test
-  (let [step1 (base-step/simple-step (fn [_ g] [true g]))
-        step2 (base-step/simple-step (fn [_ g] [true g]))
-        step3 (base-step/simple-step (fn [_ g] [true g]))]
+  (let [step1 (base-step/simple-step (fn [g] g))
+        step2 (base-step/simple-step (fn [g] g))
+        step3 (base-step/simple-step (fn [g] g))]
     (is (= [step1 step2 step3]
            (-> (game/new-game nil)
                (sut/queue-phase-steps [step1 step2 step3])
                (get-in [:gp :queue]))))))
 
 (deftest make-phase-step-test
-  (let [step1 (base-step/simple-step (fn [_ g] [false g]))
-        step2 (base-step/simple-step (fn [_ g] [true g]))
-        step3 (base-step/simple-step (fn [_ g] [true g]))]
+  (let [step1 (base-step/make-base-step
+                {:continue-step (fn [_ g] [false g])})
+        step2 (base-step/simple-step (fn [g] g))
+        step3 (base-step/simple-step (fn [g] g))]
     (is (= 1 (-> (game/new-game nil)
                  (ppln/queue-step (sut/make-phase-step))
                  (get-in [:gp :queue])

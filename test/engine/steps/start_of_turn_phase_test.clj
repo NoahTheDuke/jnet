@@ -14,11 +14,11 @@
              (click-prompt :runner "Keep")
              (:active-player)))))
 
-; (deftest gain-allotted-clicks-test
-;   (let [game (new-game nil)]
-;     (is (= :phase/start-of-turn
-;            (-> game
-;                (queue-step (sut/start-of-turn-phase game))
-;                (continue-game)
-;                (second)
-;                (:gp))))))
+(deftest correct-phase-test
+  (let [game (new-game nil)]
+    (is (= :phase/start-of-turn
+           (-> game
+               (queue-step (sut/start-of-turn-phase game))
+               (continue-game)
+               (second)
+               (:current-phase))))))

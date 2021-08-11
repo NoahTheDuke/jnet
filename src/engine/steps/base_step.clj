@@ -38,6 +38,11 @@
         (map->BaseStep)
         (validate))))
 
+(defn simple-step-wrapper
+  [continue-step]
+  (fn simple-step-wrapper [_ game]
+    [true (continue-step game)]))
+
 (defn simple-step
   [continue-step]
-  (make-base-step {:continue-step continue-step}))
+  (make-base-step {:continue-step (simple-step-wrapper continue-step)}))
