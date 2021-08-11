@@ -5,15 +5,11 @@
     [malli.error :as me]))
 
 (def BaseStepSchema
-  [:schema
-   {:registry
-    {::base-step
-     [:map {:closed true}
-      [:continue-step [:=> [:cat [:ref ::base-step] :map]
-                       [:cat :boolean :any]]]
-      [:type [:qualified-keyword {:namespace :step}]]
-      [:uuid uuid?]]}}
-   ::base-step])
+  [:map {:closed true}
+   [:continue-step [:=> [:cat :any :map]
+                    [:cat :boolean :any]]]
+   [:type [:qualified-keyword {:namespace :step}]]
+   [:uuid uuid?]])
 
 (def validate-base-step (m/validator BaseStepSchema))
 (def explain-base-step (m/explainer BaseStepSchema))

@@ -1,5 +1,4 @@
 (ns engine.steps.mulligan-step
-  "Creation"
   (:require
    [engine.draw :as draw]
    [engine.messages :as msg]

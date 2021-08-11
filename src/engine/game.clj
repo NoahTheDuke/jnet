@@ -1,8 +1,10 @@
 (ns engine.game
   (:require
+   [engine.pipeline :refer [continue-game queue-step]]
    [engine.player :refer [new-corp new-runner]]
-   [engine.pipeline :refer [continue-game]]
-   [engine.steps.setup-phase :refer [setup-phase]]))
+   [engine.steps.base-step :refer [simple-step]]
+   [engine.steps.setup-phase :as sp]
+   [engine.steps.start-of-turn-phase :refer [start-of-turn-phase]]))
 
 (defn new-game
   [{:keys [corp runner]}]
@@ -10,12 +12,26 @@
    :runner (new-runner runner)
    :gp {:pipeline []
         :queue []}
+   :active-player :runner
    :messages []
    :turns 0})
+
+(defn begin-turn []
+  (simple-step
+    (fn [_this game]
+      (let [last-turn-player (:active-player game)
+            active-player (if (= :corp last-turn-player) :runner :corp)
+            game (assoc game :active-player active-player)]
+        [true (-> game
+                  (queue-step (start-of-turn-phase game))
+                  ; (queue-step (action-phase))
+                  ; (queue-step (discard-phase))
+                  )]))))
 
 (defn start-new-game
   [opts]
   (-> (new-game opts)
-      (setup-phase)
+      (sp/setup-phase)
+      (queue-step (begin-turn))
       (continue-game)
       (second)))

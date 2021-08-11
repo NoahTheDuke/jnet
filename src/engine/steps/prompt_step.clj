@@ -28,7 +28,7 @@
   [complete? on-prompt-clicked continue-step type uuid]
   Step
   (continue-step [this game] (continue-step this game))
-  (complete? [this] (:complete? this))
+  (complete? [_] complete?)
   (on-prompt-clicked [this game player arg]
     (on-prompt-clicked this game player arg))
   (validate [this]

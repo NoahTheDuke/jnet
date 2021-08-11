@@ -136,21 +136,4 @@
                   (fn [_step _game _player _button] [:foo :bar])})
           game (-> (new-game nil)
                    (assoc-in [:gp :pipeline] [step]))]
-      (is (= [:foo :bar] (sut/handle-prompt-clicked game :corp "button")))))
-  (let [step (prompt-step
-               {:active-condition :corp
-                :active-prompt (constantly {:header "Pause!"
-                                            :text "Choose!"})
-                :on-prompt-clicked
-                (fn [_step game _player _button]
-                  [true (assoc-in game [:gp :pipeline 0 :complete?] true)])})
-        game (-> (new-game nil)
-                 (sut/queue-step step)
-                 (assoc-in [:gp :queue 0 :buttons]
-                           [{:text "Button 1"}])
-                 (sut/continue-game)
-                 (second))]
-    (is (true? (-> game
-                   (click-prompt :corp "Button 1")
-                   (first))))
-    ))
+      (is (= [:foo :bar] (sut/handle-prompt-clicked game :corp "button"))))))

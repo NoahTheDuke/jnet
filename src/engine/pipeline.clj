@@ -29,7 +29,7 @@
 
 (defn continue-game
   [game]
-  (loop [game (update-pipeline game)]
+  (let [game (update-pipeline game)]
     (if-let [step (get-current-step game)]
       (let [[result new-game] (continue-step step game)]
         (if result

@@ -20,7 +20,8 @@
       (-> game
           (pipeline/handle-prompt-clicked player (:arg foundButton))
           (second)
-          (pipeline/continue-game))
+          (pipeline/continue-game)
+          (second))
       (throw (ex-info (str "Can't find " button
                            " in current prompt for " player)
                       {:data prompt})))))

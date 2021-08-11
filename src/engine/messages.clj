@@ -21,7 +21,7 @@
                (interpose " ")
                (into output))))
       []
-      (str/split message #"((?<=\{\d\})|(?=\{\d\}))"))))
+      (str/split message #"((?<=\{\d\d?\})|(?=\{\d\d?\}))"))))
 
 (defn add-message
   ([game message] (add-message game message nil))

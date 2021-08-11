@@ -66,7 +66,6 @@
                          :arg "mulligan"}]}
              (-> game
                  (click-prompt :corp "Keep")
-                 (second)
                  (get-in [:runner :prompt-state])
                  (select-keys [:header :text :buttons]))))
       (is (= {:header ""
@@ -74,6 +73,5 @@
               :buttons []}
              (-> game
                  (click-prompt :corp "Keep")
-                 (second)
                  (get-in [:corp :prompt-state])
                  (select-keys [:header :text :buttons])))))))
