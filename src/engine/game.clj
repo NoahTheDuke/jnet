@@ -35,5 +35,4 @@
   (-> (new-game opts)
       (pipeline/queue-step (setup-phase/setup-phase))
       (pipeline/queue-step (begin-turn))
-      (pipeline/continue-game)
-      (second)))
+      (pipeline/continue-game)))

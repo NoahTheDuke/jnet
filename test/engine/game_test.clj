@@ -18,6 +18,7 @@
 (deftest corp-turn-test
   (is (= 6 (-> (sut/start-new-game {:corp {:user {:username "Corp player"}
                                            :deck [:a :b :c :d :e :f :g :h :i :j]}})
+               (second)
                (click-prompt :corp "Keep")
                (click-prompt :runner "Keep")
                (get-in [:corp :hand])

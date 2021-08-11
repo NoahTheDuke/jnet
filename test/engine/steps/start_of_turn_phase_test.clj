@@ -11,6 +11,7 @@
   (is (= :corp
          (-> (game/start-new-game {:corp {:deck [:a :b :c :d :e :f :g :h :i]}
                                    :runner {:deck [:a :b :c :d :e :f :g :h :i]}})
+             (second)
              (click-prompt :corp "Keep")
              (click-prompt :runner "Keep")
              (:active-player)))))

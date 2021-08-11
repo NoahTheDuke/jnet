@@ -7,5 +7,6 @@
 (deftest mulligan-messages
   (is (= {:text ["Corp" "has" "kept" "their" "hand"]}
          (-> (game/start-new-game nil)
+             (second)
              (click-prompt :corp "Keep")
              (get-messages)))))
