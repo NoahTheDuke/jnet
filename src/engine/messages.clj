@@ -18,7 +18,8 @@
               (conj output match)))
           (->> (str/split cur #" ")
                (remove empty?)
-               (interpose " ")
+               (str/join " ")
+               ((fn [s] [s]))
                (into output))))
       []
       (str/split message #"((?<=\{\d\d?\})|(?=\{\d\d?\}))"))))
