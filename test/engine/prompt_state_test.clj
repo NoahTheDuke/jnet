@@ -1,13 +1,10 @@
 (ns engine.prompt-state-test
   (:require
-    [engine.prompt-state :as sut]
-    [clojure.test :refer [deftest is testing]])
-  (:import [engine.prompt_state PromptState]))
+   [clojure.test :refer [deftest is testing]]
+   [engine.prompt-state :as sut]))
 
 (deftest make-prompt-state-test
   (testing "validation works"
-    (is (instance? PromptState (sut/make-prompt-state :corp)))
-    (is (instance? PromptState (sut/make-prompt-state :runner)))
     (is (thrown? clojure.lang.ExceptionInfo (sut/make-prompt-state :player)))))
 
 (deftest set-prompt-test

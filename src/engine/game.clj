@@ -20,10 +20,10 @@
   (simple-step
     (fn [game]
       (let [last-turn-player (:active-player game)
-            active-player (if (= :corp last-turn-player) :runner :corp)
-            game (assoc game :active-player active-player)]
+            active-player (if (= :corp last-turn-player) :runner :corp)]
         (-> game
-            (queue-step (start-of-turn-phase game)))))))
+            (assoc :active-player active-player)
+            (queue-step (start-of-turn-phase)))))))
 
 (defn start-new-game
   [opts]
