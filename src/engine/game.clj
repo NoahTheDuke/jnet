@@ -28,7 +28,7 @@
 (defn start-new-game
   [opts]
   (-> (new-game opts)
-      (sp/setup-phase)
+      (queue-step (sp/setup-phase))
       (queue-step (begin-turn))
       (continue-game)
       (second)))
