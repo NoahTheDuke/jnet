@@ -1,9 +1,9 @@
 (ns engine.steps.setup-phase
   (:require
-   [engine.draw :refer [draw]]
-   [engine.steps.base-step :refer [simple-step]]
-   [engine.steps.mulligan-step :refer [mulligan-prompt]]
-   [engine.steps.phase-step :refer [make-phase-step]]))
+   [engine.draw :as draw]
+   [engine.steps.step :refer [simple-step]]
+   [engine.steps.mulligan-step :as mulligan]
+   [engine.steps.phase-step :as phase]))
 
 (defn setup-begin []
   (simple-step
@@ -16,13 +16,13 @@
   (simple-step
     (fn [game]
       (-> game
-          (draw :corp 5)
-          (draw :runner 5)))))
+          (draw/draw :corp 5)
+          (draw/draw :runner 5)))))
 
 (defn setup-phase []
-  (make-phase-step
+  (phase/make-phase-step
     {:phase :phase/setup
      :steps [(setup-begin)
              (draw-initial-hands)
-             (mulligan-prompt :corp)
-             (mulligan-prompt :runner)]}))
+             (mulligan/mulligan-prompt :corp)
+             (mulligan/mulligan-prompt :runner)]}))

@@ -1,6 +1,6 @@
 (ns engine.player
   (:require
-    [engine.prompt-state :as ps]))
+    [engine.prompt-state :as prompt-state]))
 
 (defn new-player
   [{:keys [user identity deck]}]
@@ -22,7 +22,7 @@
 (defn new-corp [opts]
   (merge
     (new-player opts)
-    {:prompt-state (ps/make-prompt-state :corp)
+    {:prompt-state (prompt-state/make-prompt-state :corp)
      :bad-publicity {:base 0
                      :additional 0}
      :clicks-per-turn 3}))
@@ -30,7 +30,7 @@
 (defn new-runner [opts]
   (merge
     (new-player opts)
-    {:prompt-state (ps/make-prompt-state :runner)
+    {:prompt-state (prompt-state/make-prompt-state :runner)
      :brain-damage 0
      :clicks-per-turn 4
      :link 0
@@ -39,8 +39,8 @@
 
 (defn set-player-prompt
   [player props]
-  (update player :prompt-state ps/set-prompt props))
+  (update player :prompt-state prompt-state/set-prompt props))
 
 (defn clear-player-prompt
   [player]
-  (update player :prompt-state ps/clear-prompt))
+  (update player :prompt-state prompt-state/clear-prompt))

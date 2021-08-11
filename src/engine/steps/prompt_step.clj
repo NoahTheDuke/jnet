@@ -1,24 +1,23 @@
 (ns engine.steps.prompt-step
   "Prompt Steps are steps that "
   (:require
-   [engine.player :refer [clear-player-prompt set-player-prompt]]
-   [engine.steps.base-step :refer [BaseStepSchema]]
-   [engine.steps.step-protocol :refer [Step complete? validate]]
+   [engine.player :as player]
+   [engine.steps.step :as step]
    [malli.core :as m]
    [malli.error :as me]
    [malli.util :as mu]))
 
 (def PromptStepSchema
   (mu/merge
-    BaseStepSchema
+    step/BaseStepSchema
     [:map {:closed true}
      [:complete? boolean?]
      [:active-condition [:or
                          [:enum :corp :runner]
-                         [:=> [:cat BaseStepSchema :map :keyword] :boolean]]]
-     [:active-prompt [:=> [:cat BaseStepSchema :map :keyword] :any]]
-     [:waiting-prompt [:=> [:cat BaseStepSchema :map :keyword] :any]]
-     [:on-prompt-clicked [:=> [:cat BaseStepSchema :map [:enum :corp :runner] :string]
+                         [:=> [:cat step/BaseStepSchema :map :keyword] :boolean]]]
+     [:active-prompt [:=> [:cat step/BaseStepSchema :map :keyword] :any]]
+     [:waiting-prompt [:=> [:cat step/BaseStepSchema :map :keyword] :any]]
+     [:on-prompt-clicked [:=> [:cat step/BaseStepSchema :map [:enum :corp :runner] :string]
                           [:cat :boolean :any]]]]))
 
 (def validate-prompt-step (m/validator PromptStepSchema))
@@ -26,7 +25,7 @@
 
 (defrecord PromptStep
   [complete? on-prompt-clicked continue-step type uuid]
-  Step
+  step/Step
   (continue-step [this game] (continue-step this game))
   (complete? [_] complete?)
   (on-prompt-clicked [this game player arg]
@@ -48,11 +47,11 @@
   [game player {:keys [active-prompt] :as this}]
   (->> (active-prompt this game player)
        (bind-buttons this)
-       (update game player set-player-prompt)))
+       (update game player player/set-player-prompt)))
 
 (defn set-waiting-prompt
   [game player {:keys [waiting-prompt] :as this}]
-  (update game player set-player-prompt (waiting-prompt this game player)))
+  (update game player player/set-player-prompt (waiting-prompt this game player)))
 
 (defn set-prompt
   [{:keys [active-condition] :as this} game]
@@ -65,12 +64,12 @@
 (defn clear-prompt
   [game]
   (-> game
-      (update :corp clear-player-prompt)
-      (update :runner clear-player-prompt)))
+      (update :corp player/clear-player-prompt)
+      (update :runner player/clear-player-prompt)))
 
 (defn prompt-continue-step
   [this game]
-  (let [completed (complete? this)
+  (let [completed (step/complete? this)
         game (if completed
                (clear-prompt game)
                (set-prompt this game))]
@@ -93,4 +92,4 @@
         :type :step/prompt
         :uuid (java.util.UUID/randomUUID)}
        (map->PromptStep)
-       (validate)))
+       (step/validate)))

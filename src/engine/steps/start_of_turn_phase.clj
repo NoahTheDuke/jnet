@@ -1,7 +1,7 @@
 (ns engine.steps.start-of-turn-phase
   (:require
-   [engine.steps.base-step :refer [make-base-step simple-step]]
-   [engine.steps.phase-step :refer [make-phase-step]]))
+   [engine.steps.step :as step :refer [simple-step]]
+   [engine.steps.phase-step :as phase]))
 
 (defn gain-allotted-clicks []
   (simple-step
@@ -37,12 +37,12 @@
   * “when your turn begins”
   * checkpoint"
   []
-  (make-phase-step
+  (phase/make-phase-step
     {:phase :phase/start-of-turn
      :steps [(gain-allotted-clicks)
              (start-of-turn-paw)
              (refill-recurring-credits)
              (trigger-start-of-turn-abilities)
              (checkpoint)
-             (make-base-step
+             (step/make-base-step
                {:continue-step (fn [_ game] [false game])})]}))

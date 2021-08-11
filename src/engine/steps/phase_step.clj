@@ -1,7 +1,7 @@
 (ns engine.steps.phase-step
   (:require
-   [engine.pipeline :refer [queue-step]]
-   [engine.steps.base-step :refer [simple-step]]))
+   [engine.pipeline :as pipeline]
+   [engine.steps.step :refer [simple-step]]))
 
 (defn start-phase
   [phase]
@@ -27,7 +27,7 @@
 
 (defn queue-phase-steps
   [game steps]
-  (reduce queue-step game steps))
+  (reduce pipeline/queue-step game steps))
 
 (defn make-phase-step
   "A wrapper around simple-step that queues start-phase and end-phase steps automatically."

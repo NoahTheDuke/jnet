@@ -1,8 +1,8 @@
 (ns engine.steps.prompt-step-test
   (:require
    [clojure.test :refer [deftest is testing]]
-   [engine.game :refer [new-game]]
-   [engine.pipeline :refer [continue-game queue-step]]
+   [engine.game :as game]
+   [engine.pipeline :as pipeline]
    [engine.steps.prompt-step :as sut]
    [engine.test-helper]))
 
@@ -36,7 +36,7 @@
                  {:active-condition :corp
                   :active-prompt (constantly active-prompt)
                   :waiting-prompt (constantly waiting-prompt)})
-          game (new-game {})]
+          game (game/new-game {})]
       (testing "active-condition checks the player arg"
         (is ((:active-condition step) step game :corp))
         (is (not ((:active-condition step) step game :runner))))
@@ -56,7 +56,7 @@
                  {:active-condition :corp
                   :active-prompt (constantly active-prompt)
                   :waiting-prompt (constantly waiting-prompt)})
-          game (new-game nil)
+          game (game/new-game nil)
           {:keys [corp runner] :as new-game} (sut/set-prompt step game)]
       (is (not= game new-game))
       (is (= (:header active-prompt) (get-in corp [:prompt-state :header])))
@@ -70,9 +70,9 @@
           step (sut/prompt-step
                  {:active-condition :corp
                   :active-prompt (constantly active-prompt)})
-          {:keys [corp runner]} (-> (new-game {})
-                                    (queue-step step)
-                                    (continue-game)
+          {:keys [corp runner]} (-> (game/new-game {})
+                                    (pipeline/queue-step step)
+                                    (pipeline/continue-game)
                                     (second))]
       (is (= (:header active-prompt) (get-in corp [:prompt-state :header])))
       (is (= (:text active-prompt) (get-in corp [:prompt-state :text])))
@@ -83,10 +83,10 @@
           step (sut/prompt-step
                  {:active-condition :corp
                   :active-prompt (constantly active-prompt)})
-          {:keys [corp runner]} (-> (new-game {})
-                                    (queue-step step)
+          {:keys [corp runner]} (-> (game/new-game {})
+                                    (pipeline/queue-step step)
                                     (assoc-in [:gp :queue 0 :complete?] true)
-                                    (continue-game)
+                                    (pipeline/continue-game)
                                     (second))]
       (is (= "" (get-in corp [:prompt-state :header])))
       (is (= "" (get-in corp [:prompt-state :text])))

@@ -1,12 +1,12 @@
 (ns engine.pipeline
   (:require
-   [com.rpl.specter :refer [AFTER-ELEM ALL BEGINNING FIRST NONE select setval]]
-   [engine.steps.step-protocol :refer [continue-step on-prompt-clicked validate]]))
+   [com.rpl.specter :as specter]
+   [engine.steps.step :as step]))
 
 (defn queue-step
   [game step]
-  (validate step)
-  (setval [:gp :queue AFTER-ELEM] step game))
+  (step/validate step)
+  (specter/setval [:gp :queue specter/AFTER-ELEM] step game))
 
 (defn get-current-step
   [game]
@@ -18,20 +18,20 @@
 
 (defn drop-current-step
   [game]
-  (setval [:gp :pipeline FIRST] NONE game))
+  (specter/setval [:gp :pipeline specter/FIRST] specter/NONE game))
 
 (defn update-pipeline
   [game]
-  (let [queue (select [:gp :queue ALL] game)]
+  (let [queue (specter/select [:gp :queue specter/ALL] game)]
     (->> game
-         (setval [:gp :queue ALL] NONE)
-         (setval [:gp :pipeline BEGINNING] queue))))
+         (specter/setval [:gp :queue specter/ALL] specter/NONE)
+         (specter/setval [:gp :pipeline specter/BEGINNING] queue))))
 
 (defn continue-game
   [game]
   (let [game (update-pipeline game)]
     (if-let [step (get-current-step game)]
-      (let [[result new-game] (continue-step step game)]
+      (let [[result new-game] (step/continue-step step game)]
         (if result
           (recur (drop-current-step new-game))
           [false new-game]))
@@ -40,5 +40,5 @@
 (defn handle-prompt-clicked
   [game player button]
   (if-let [step (get-current-step game)]
-    (on-prompt-clicked step game player button)
+    (step/on-prompt-clicked step game player button)
     [false game]))
