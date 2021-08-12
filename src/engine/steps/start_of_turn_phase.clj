@@ -1,7 +1,7 @@
 (ns engine.steps.start-of-turn-phase
   (:require
    [engine.steps.step :as step :refer [simple-step]]
-   [engine.steps.phase-step :as phase]))
+   [engine.steps.phase :as phase]))
 
 (defn gain-allotted-clicks []
   (simple-step
@@ -37,7 +37,7 @@
   * “when your turn begins”
   * checkpoint"
   []
-  (phase/make-phase-step
+  (phase/make-phase
     {:phase :start-of-turn
      :steps [(gain-allotted-clicks)
              (start-of-turn-paw)

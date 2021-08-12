@@ -1,4 +1,4 @@
-(ns engine.steps.prompt-step
+(ns engine.steps.prompt
   "Prompt Steps are steps that "
   (:require
    [engine.player :as player]
@@ -7,7 +7,7 @@
    [malli.error :as me]
    [malli.util :as mu]))
 
-(def PromptStepSchema
+(def BasePromptSchema
   (mu/merge
     step/BaseStepSchema
     [:map {:closed true}
@@ -19,8 +19,8 @@
      [:on-prompt-clicked [:=> [:cat :map :map [:enum :corp :runner] :string]
                           [:cat :boolean :any]]]]))
 
-(def validate-prompt-step (m/validator PromptStepSchema))
-(def explain-prompt-step (m/explainer PromptStepSchema))
+(def validate-prompt (m/validator BasePromptSchema))
+(def explain-prompt (m/explainer BasePromptSchema))
 
 (defrecord PromptStep
   [complete? on-prompt-clicked continue-step type uuid]
@@ -30,9 +30,9 @@
   (on-prompt-clicked [this game player arg]
     (on-prompt-clicked this game player arg))
   (validate [this]
-    (if (validate-prompt-step this)
+    (if (validate-prompt this)
       this
-      (let [explained-error (explain-prompt-step (into {} this))]
+      (let [explained-error (explain-prompt (into {} this))]
         (throw (ex-info (str "Prompt step isn't valid: " (pr-str (me/humanize explained-error)))
                         (select-keys explained-error [:errors])))))))
 
@@ -76,7 +76,7 @@
                (set-prompt this game))]
     [completed game]))
 
-(defn prompt-step
+(defn base-prompt
   [{:keys [active-condition active-prompt waiting-prompt
            on-prompt-clicked]}]
   (->> {:active-condition

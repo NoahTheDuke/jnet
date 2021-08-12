@@ -2,7 +2,7 @@
   (:require
    [engine.messages :as msg]
    [engine.pipeline :as pipeline]
-   [engine.steps.prompt-step :as prompt-step]))
+   [engine.steps.prompt :as prompt]))
 
 (defn action-active-prompt
   [& _args]
@@ -18,7 +18,7 @@
     [true (update-in game [player :credits] inc)]))
 
 (defn action-phase [player]
-  (prompt-step/prompt-step
+  (prompt/base-prompt
     {:active-condition player
      :active-prompt action-active-prompt
      :on-prompt-clicked action-prompt-clicked}))

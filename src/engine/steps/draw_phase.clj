@@ -2,7 +2,7 @@
   (:require
    [engine.draw :as draw]
    [engine.messages :as msg]
-   [engine.steps.phase-step :as phase]
+   [engine.steps.phase :as phase]
    [engine.steps.step :as step :refer [simple-step]]))
 
 (defn mandatory-draw []
@@ -13,7 +13,7 @@
           (draw/draw :corp 1)))))
 
 (defn draw-phase []
-  (phase/make-phase-step
+  (phase/make-phase
     {:phase :draw
      :condition (fn [game] (= :corp (:active-player game)))
      :steps [(mandatory-draw)]}))

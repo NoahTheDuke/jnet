@@ -1,12 +1,11 @@
-(ns engine.steps.prompt-step-test
+(ns engine.steps.prompt-test
   (:require
    [clojure.test :refer [deftest is testing]]
    [engine.game :as game]
    [engine.pipeline :as pipeline]
-   [engine.steps.prompt-step :as sut]
-   [engine.test-helper]))
+   [engine.steps.prompt :as sut]))
 
-(deftest make-prompt-step-test
+(deftest make-prompt-test
   (let [active-condition (constantly true)
         active-prompt (constantly nil)
         waiting-prompt (constantly nil)]
@@ -19,11 +18,11 @@
                   :active-prompt active-prompt
                   :waiting-prompt waiting-prompt
                   :type :step/prompt}
-                 (sut/prompt-step)
+                 (sut/base-prompt)
                  (select-keys [:active-condition :active-prompt
                                :waiting-prompt :type])))))
     (testing "waiting-prompt has a default"
-      (is (= ((:waiting-prompt (sut/prompt-step {:active-condition :corp
+      (is (= ((:waiting-prompt (sut/base-prompt {:active-condition :corp
                                                  :active-prompt (constantly {:title "yes"})}))
               nil nil nil)
              {:text "Waiting for opponent"})))))
@@ -32,7 +31,7 @@
     (let [active-prompt {:header "Example header"
                          :text "Example text"}
           waiting-prompt {:text "Waiting text"}
-          step (sut/prompt-step
+          step (sut/base-prompt
                  {:active-condition :corp
                   :active-prompt (constantly active-prompt)
                   :waiting-prompt (constantly waiting-prompt)})
@@ -52,7 +51,7 @@
     (let [active-prompt {:header "Example header"
                          :text "Example text"}
           waiting-prompt {:text "Waiting text"}
-          step (sut/prompt-step
+          step (sut/base-prompt
                  {:active-condition :corp
                   :active-prompt (constantly active-prompt)
                   :waiting-prompt (constantly waiting-prompt)})
@@ -67,7 +66,7 @@
   (testing "continue calls into set-prompt"
     (let [active-prompt {:header "Example header"
                          :text "Example text"}
-          step (sut/prompt-step
+          step (sut/base-prompt
                  {:active-condition :corp
                   :active-prompt (constantly active-prompt)})
           {:keys [corp runner]} (-> (game/new-game {})
@@ -80,7 +79,7 @@
   (testing "player prompts are restored after step is complete"
     (let [active-prompt {:header "Example header"
                          :text "Example text"}
-          step (sut/prompt-step
+          step (sut/base-prompt
                  {:active-condition :corp
                   :active-prompt (constantly active-prompt)})
           {:keys [corp runner]} (-> (game/new-game {})

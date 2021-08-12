@@ -1,4 +1,4 @@
-(ns engine.steps.phase-step
+(ns engine.steps.phase
   (:require
    [engine.pipeline :as pipeline]
    [engine.steps.step :refer [simple-step]]
@@ -39,10 +39,10 @@
 (def validate-opts (m/validator PhaseOptsSchema))
 (def explain-opts (m/explainer PhaseOptsSchema))
 
-(defn make-phase-step
+(defn make-phase
   "A wrapper around simple-step that queues start-phase and end-phase steps automatically.
   If :condition is a function that returns true, the phase will be run. Otherwise, the step will exit."
-  ([] (make-phase-step {}))
+  ([] (make-phase {}))
   ([{condition :condition :as opts}]
    (assert (validate-opts opts) (:errors (explain-opts opts)))
    (-> (simple-step

@@ -4,7 +4,7 @@
    [engine.game :as game]
    [engine.pipeline :as sut]
    [engine.steps.step :as step]
-   [engine.steps.prompt-step :as prompt]))
+   [engine.steps.prompt :as prompt]))
 
 (deftest queue-steps-test
   (let [game (game/new-game nil)
@@ -111,7 +111,7 @@
     (let [game (game/new-game nil)]
       (is (= [false game] (sut/handle-prompt-clicked game :corp "button")))))
   (testing "doesn't update the pipeline"
-    (let [step (prompt/prompt-step
+    (let [step (prompt/base-prompt
                  {:active-prompt (constantly {:text "text"})
                   :active-condition :corp})
           game (-> (game/new-game nil)
@@ -121,14 +121,14 @@
                   (second)
                   (:gp))))))
   (testing "returns false if pipeline is empty"
-    (let [step (prompt/prompt-step
+    (let [step (prompt/base-prompt
                  {:active-prompt (constantly {:text "text"})
                   :active-condition :corp})
           game (-> (game/new-game nil)
                    (sut/queue-step step))]
       (is (false? (first (sut/handle-prompt-clicked game :corp "button"))))))
   (testing "calls 'on-prompt-clicked' on current step"
-    (let [step (prompt/prompt-step
+    (let [step (prompt/base-prompt
                  {:active-prompt (constantly {:text "text"})
                   :active-condition :corp
                   :on-prompt-clicked

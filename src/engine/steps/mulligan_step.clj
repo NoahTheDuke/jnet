@@ -3,7 +3,7 @@
    [engine.draw :as draw]
    [engine.messages :as msg]
    [engine.pipeline :as pipeline]
-   [engine.steps.prompt-step :as prompt-state]))
+   [engine.steps.prompt :as prompt]))
 
 (defn mulligan-active-prompt
   [& _args]
@@ -33,7 +33,7 @@
                   (draw/draw player 5))]))))
 
 (defn mulligan-prompt [player]
-  (prompt-state/prompt-step
+  (prompt/base-prompt
     {:active-condition player
      :active-prompt mulligan-active-prompt
      :on-prompt-clicked mulligan-prompt-clicked}))

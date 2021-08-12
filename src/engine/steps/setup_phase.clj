@@ -3,7 +3,7 @@
    [engine.draw :as draw]
    [engine.steps.step :refer [simple-step]]
    [engine.steps.mulligan-step :as mulligan]
-   [engine.steps.phase-step :as phase]))
+   [engine.steps.phase :as phase]))
 
 (defn setup-begin []
   (simple-step
@@ -22,7 +22,7 @@
           (draw/draw :runner 5)))))
 
 (defn setup-phase []
-  (phase/make-phase-step
+  (phase/make-phase
     {:phase :setup
      :steps [(setup-begin)
              (draw-initial-hands)
