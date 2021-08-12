@@ -19,7 +19,7 @@
                   "{0} has taken a mulligan")
         game (-> game
                  (pipeline/complete-current-step)
-                 (msg/add-message message [player]))]
+                 (msg/add-message message [(get game player)]))]
     (if (= arg "keep")
       [true game]
       (let [hand (get-in game [player :hand])

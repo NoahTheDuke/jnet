@@ -45,9 +45,10 @@
   ([] (make-phase-step {}))
   ([{condition :condition :as opts}]
    (assert (validate-opts opts) (:errors (explain-opts opts)))
-   (simple-step
-     (fn [game]
-       (if (or (not (fn? condition))
-               (condition game))
-         (queue-phase-steps game (initialize-steps opts))
-         game)))))
+   (-> (simple-step
+         (fn [game]
+           (if (or (not (fn? condition))
+                   (condition game))
+             (queue-phase-steps game (initialize-steps opts))
+             game)))
+       (assoc :type :step/phase))))

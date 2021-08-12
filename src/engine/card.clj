@@ -1,7 +1,6 @@
 (ns engine.card
   (:require
-   [malli.core :as m]
-   [malli.error :as me]))
+   [malli.core :as m]))
 
 (def Card
   [:map
@@ -22,9 +21,5 @@
    [:uniqueness boolean?]])
 
 (defn map->Card [card]
-  (if (m/validate Card card)
-    card
-    (let [reason (m/explain Card card)]
-      (throw (ex-info (str "Card " card " isn't valid: "
-                           (pr-str (me/humanize reason)))
-                      (select-keys reason [:errors]))))))
+  (assert (m/validate Card card) (:errors (m/explain Card card)))
+  card)
