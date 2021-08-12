@@ -1,6 +1,7 @@
 (ns engine.steps.prompt
   "Prompt Steps are steps that "
   (:require
+   [engine.pipeline :as pipeline]
    [engine.player :as player]
    [engine.steps.step :as step]
    [malli.core :as m]
@@ -15,7 +16,7 @@
      [:active-condition
       [:or [:enum :corp :runner] [:=> [:cat :map :map :keyword] :boolean]]]
      [:active-prompt [:=> [:cat :map :map :keyword] :map]]
-     [:waiting-prompt [:=> [:cat :map :map :keyword] :map]]
+     [:waiting-prompt [:map [:text :string]]]
      [:on-prompt-clicked [:=> [:cat :map :map [:enum :corp :runner] :string]
                           [:cat :boolean :any]]]]))
 
@@ -42,6 +43,7 @@
     (assoc prompt :buttons buttons)
     prompt))
 
+;; active-prompt -> PromptOptsSchema
 (defn set-active-prompt
   [game player {:keys [active-prompt] :as this}]
   (->> (active-prompt this game player)
@@ -49,8 +51,8 @@
        (update game player player/set-player-prompt)))
 
 (defn set-waiting-prompt
-  [game player {:keys [waiting-prompt] :as this}]
-  (update game player player/set-player-prompt (waiting-prompt this game player)))
+  [game player {:keys [waiting-prompt]}]
+  (update game player player/set-player-prompt waiting-prompt))
 
 (defn set-prompt
   [{:keys [active-condition] :as this} game]
@@ -77,15 +79,14 @@
     [completed game]))
 
 (defn base-prompt
-  [{:keys [active-condition active-prompt waiting-prompt
+  [{:keys [active-condition active-prompt waiting-text
            on-prompt-clicked]}]
   (->> {:active-condition
         (cond
           (fn? active-condition) active-condition
           (keyword? active-condition) (fn [_this _game player] (= player active-condition)))
         :active-prompt active-prompt
-        :waiting-prompt (or waiting-prompt
-                            (constantly {:text "Waiting for opponent"}))
+        :waiting-prompt {:text (or waiting-text "Waiting for opponent")}
         :complete? false
         :continue-step prompt-continue-step
         :on-prompt-clicked (or on-prompt-clicked
@@ -94,3 +95,42 @@
         :uuid (java.util.UUID/randomUUID)}
        (map->PromptStep)
        (step/validate)))
+
+(defn handler-active-prompt
+  [active-text buttons]
+  (fn [_this _game _player]
+    {:header "Choices prompt"
+     :text (or active-text "Select one")
+     :buttons buttons}))
+
+(defn handler-on-prompt-clicked
+  [choices]
+  (fn [_this game _player arg]
+    (if-let [choic (get choices arg)]
+      [true (-> game
+                (choic)
+                (pipeline/complete-current-step))]
+      [false game])))
+
+(def HandlerPromptPropsSchema
+  [:map {:closed true}
+   [:active-condition
+    {:optional true}
+    [:or [:enum :corp :runner] [:=> [:cat :map :map :keyword] :boolean]]]
+   [:active-text {:optional true} :string]
+   [:waiting-text {:optional true} :string]
+   [:choices [:map-of :string [:=> [:cat :map] :map]]]])
+
+(def validate-handler-props (m/validator HandlerPromptPropsSchema))
+(def explain-handler-props (m/explainer HandlerPromptPropsSchema))
+
+(defn handler-prompt
+  [props]
+  (assert (validate-handler-props props) (me/humanize (explain-handler-props props)))
+  (let [{:keys [active-condition active-text waiting-text choices]} props
+        buttons (mapv (fn [k] {:text k :arg k}) (keys choices))]
+    (base-prompt
+      {:active-condition active-condition
+       :waiting-text waiting-text
+       :active-prompt (handler-active-prompt active-text buttons)
+       :on-prompt-clicked (handler-on-prompt-clicked choices)})))

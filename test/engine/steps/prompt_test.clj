@@ -1,40 +1,44 @@
 (ns engine.steps.prompt-test
   (:require
    [clojure.test :refer [deftest is testing]]
+   [engine.draw :as draw]
    [engine.game :as game]
    [engine.pipeline :as pipeline]
-   [engine.steps.prompt :as sut]))
+   [engine.prompt-state :as prompt-state]
+   [engine.steps.prompt :as sut]
+   [engine.test-helper :refer [click-prompt]]))
 
 (deftest make-prompt-test
   (let [active-condition (constantly true)
         active-prompt (constantly nil)
-        waiting-prompt (constantly nil)]
+        waiting-text ""]
     (testing "Assigns props correctly"
       (is (= {:active-condition active-condition
               :active-prompt active-prompt
-              :waiting-prompt waiting-prompt
+              :waiting-prompt {:text waiting-text}
               :type :step/prompt}
              (-> {:active-condition active-condition
                   :active-prompt active-prompt
-                  :waiting-prompt waiting-prompt
-                  :type :step/prompt}
+                  :waiting-text waiting-text}
                  (sut/base-prompt)
                  (select-keys [:active-condition :active-prompt
                                :waiting-prompt :type])))))
     (testing "waiting-prompt has a default"
-      (is (= ((:waiting-prompt (sut/base-prompt {:active-condition :corp
-                                                 :active-prompt (constantly {:title "yes"})}))
-              nil nil nil)
+      (is (= (-> {:active-condition :corp
+                  :active-prompt (constantly {:title "yes"})}
+                 (sut/base-prompt)
+                 (:waiting-prompt))
              {:text "Waiting for opponent"})))))
 
 (deftest step-functions-test
     (let [active-prompt {:header "Example header"
                          :text "Example text"}
-          waiting-prompt {:text "Waiting text"}
+          waiting-text "Waiting text"
+          waiting-prompt {:text waiting-text}
           step (sut/base-prompt
                  {:active-condition :corp
                   :active-prompt (constantly active-prompt)
-                  :waiting-prompt (constantly waiting-prompt)})
+                  :waiting-text waiting-text})
           game (game/new-game {})]
       (testing "active-condition checks the player arg"
         (is ((:active-condition step) step game :corp))
@@ -43,24 +47,23 @@
         (is (= active-prompt ((:active-prompt step) step game :corp)))
         (is (= active-prompt ((:active-prompt step) step game :runner))))
       (testing "waiting-prompt returns the prompt unconditionally"
-        (is (= waiting-prompt ((:waiting-prompt step) step game :corp)))
-        (is (= waiting-prompt ((:waiting-prompt step) step game :runner))))))
+        (is (= waiting-prompt (:waiting-prompt step))))))
 
 (deftest set-prompt-test
   (testing "updates both players"
     (let [active-prompt {:header "Example header"
                          :text "Example text"}
-          waiting-prompt {:text "Waiting text"}
+          waiting-text "Waiting text"
           step (sut/base-prompt
                  {:active-condition :corp
                   :active-prompt (constantly active-prompt)
-                  :waiting-prompt (constantly waiting-prompt)})
+                  :waiting-text waiting-text})
           game (game/new-game nil)
           {:keys [corp runner] :as new-game} (sut/set-prompt step game)]
       (is (not= game new-game))
       (is (= (:header active-prompt) (get-in corp [:prompt-state :header])))
       (is (= (:text active-prompt) (get-in corp [:prompt-state :text])))
-      (is (= (:text waiting-prompt) (get-in runner [:prompt-state :text]))))))
+      (is (= waiting-text (get-in runner [:prompt-state :text]))))))
 
 (deftest pipeline-interaction-test
   (testing "continue calls into set-prompt"
@@ -69,13 +72,16 @@
           step (sut/base-prompt
                  {:active-condition :corp
                   :active-prompt (constantly active-prompt)})
-          {:keys [corp runner]} (-> (game/new-game {})
-                                    (pipeline/queue-step step)
-                                    (pipeline/continue-game)
-                                    (second))]
-      (is (= (:header active-prompt) (get-in corp [:prompt-state :header])))
-      (is (= (:text active-prompt) (get-in corp [:prompt-state :text])))
-      (is (= "Waiting for opponent" (get-in runner [:prompt-state :text])))))
+          game (-> (game/new-game {})
+                   (pipeline/queue-step step)
+                   (pipeline/continue-game)
+                   (second))]
+      (is (= (:header active-prompt)
+             (prompt-state/prompt-header game :corp)))
+      (is (= (:text active-prompt)
+             (prompt-state/prompt-text game :corp)))
+      (is (= "Waiting for opponent"
+             (prompt-state/prompt-text game :runner)))))
   (testing "player prompts are restored after step is complete"
     (let [active-prompt {:header "Example header"
                          :text "Example text"}
@@ -90,3 +96,33 @@
       (is (= "" (get-in corp [:prompt-state :header])))
       (is (= "" (get-in corp [:prompt-state :text])))
       (is (= "" (get-in runner [:prompt-state :text]))))))
+
+(deftest prompt-with-handlers-test
+  (let [step (sut/handler-prompt
+               {:active-condition :corp
+                :active-text "How many to draw?"
+                :waiting-text "Corp to draw"
+                :choices {"Draw 1" (fn [game]
+                                     (draw/draw game :corp 1))
+                          "Draw 2" (fn [game]
+                                     (draw/draw game :corp 2))}})]
+    (is (= "How many to draw?"
+           (-> (game/new-game nil)
+               (pipeline/queue-step step)
+               (pipeline/continue-game)
+               (second)
+               (prompt-state/prompt-text :corp))))
+    (is (= "Corp to draw"
+           (-> (game/new-game nil)
+               (pipeline/queue-step step)
+               (pipeline/continue-game)
+               (second)
+               (prompt-state/prompt-text :runner))))
+    (is (= 2
+           (-> (game/new-game {:corp {:deck [:a :b :c]}})
+               (pipeline/queue-step step)
+               (pipeline/continue-game)
+               (second)
+               (click-prompt :corp "Draw 2")
+               (get-in [:corp :hand])
+               (count))))))
