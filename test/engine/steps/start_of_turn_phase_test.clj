@@ -19,7 +19,6 @@
 (deftest gain-allotted-clicks-test
   (is (= (:clicks-per-turn (player/new-corp nil))
          (-> (game/new-game nil)
-             (assoc :active-player :corp)
              (pipeline/queue-step (sut/gain-allotted-clicks))
              (pipeline/continue-game)
              (second)

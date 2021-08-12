@@ -13,22 +13,17 @@
    :runner (player/new-runner runner)
    :gp {:pipeline []
         :queue []}
-   :active-player :runner
-   :inactive-player :corp
+   :active-player :corp
+   :inactive-player :runner
    :messages []
    :turns 0})
 
 (defn begin-turn []
   (step/simple-step
     (fn [game]
-      (let [last-turn-player (:active-player game)
-            active-player (if (= :corp last-turn-player) :runner :corp)
-            inactive-player last-turn-player]
-        (-> game
-            (assoc :active-player active-player
-                   :inactive-player inactive-player)
-            (pipeline/queue-step (sot-phase/start-of-turn-phase))
-            (pipeline/queue-step (draw-phase/draw-phase)))))))
+      (-> game
+          (pipeline/queue-step (sot-phase/start-of-turn-phase))
+          (pipeline/queue-step (draw-phase/draw-phase))))))
 
 (defn start-new-game
   [opts]

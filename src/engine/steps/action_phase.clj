@@ -1,19 +1,24 @@
 (ns engine.steps.action-phase
   (:require
-   [engine.draw :as draw]
    [engine.messages :as msg]
-   [engine.steps.phase-step :as phase]
-   [engine.steps.step :as step :refer [simple-step]]))
+   [engine.pipeline :as pipeline]
+   [engine.steps.prompt-step :as prompt-step]))
 
-(defn mandatory-draw []
-  (simple-step
-    (fn [game]
-      (-> game
-          (msg/add-message "{0} draws 1 card for their mandatory draw." [(:corp game)])
-          (draw/draw :corp 1)))))
+(defn action-active-prompt
+  [& _args]
+  {:header "Action Phase"
+   :text "You have 3 clicks. Choose an action."
+   :buttons [{:text "[click] Gain 1[c]." :arg "credit"}]})
 
-(defn draw-phase []
-  (phase/make-phase-step
-    {:phase :draw
-     :condition (fn [game] (= :corp (:active-player game)))
-     :steps [(mandatory-draw)]}))
+(defn action-prompt-clicked
+  [_this game player _arg]
+  (let [game (-> game
+                 (pipeline/complete-current-step)
+                 (msg/add-message "{0} gains 1 credit." [(get game player)]))]
+    [true (update-in game [player :credits] inc)]))
+
+(defn action-phase [player]
+  (prompt-step/prompt-step
+    {:active-condition player
+     :active-prompt action-active-prompt
+     :on-prompt-clicked action-prompt-clicked}))

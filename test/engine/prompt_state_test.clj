@@ -5,14 +5,14 @@
 
 (deftest make-prompt-state-test
   (testing "validation works"
-    (is (thrown? clojure.lang.ExceptionInfo (sut/make-prompt-state :player)))))
+    (is (thrown? java.lang.AssertionError (sut/make-prompt-state :player)))))
 
 (deftest set-prompt-test
   (testing "validation works"
-    (is (thrown? clojure.lang.ExceptionInfo
+    (is (thrown? java.lang.AssertionError
                  (-> (sut/make-prompt-state :corp)
                      (sut/set-prompt nil))))
-    (is (thrown? clojure.lang.ExceptionInfo
+    (is (thrown? java.lang.AssertionError
                  (-> (sut/make-prompt-state :corp)
                      (sut/set-prompt {:header "optional"})))))
   (is (= {:select-card true

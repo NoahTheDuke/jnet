@@ -9,7 +9,6 @@
 (deftest draw-if-corp-test
   (let [game (-> (game/new-game {:corp {:user {:username "Corp player"}
                                         :deck ["Hedge Fund"]}})
-                 (assoc :active-player :corp)
                  (pipeline/queue-step (sut/draw-phase))
                  (pipeline/continue-game)
                  (second))]
@@ -20,7 +19,6 @@
            (-> game
                (get-messages)))))
   (is (= 0 (-> (game/new-game {:runner {:deck ["Sure Gamble"]}})
-               (assoc :active-player :runner)
                (pipeline/queue-step (sut/draw-phase))
                (pipeline/continue-game)
                (second)

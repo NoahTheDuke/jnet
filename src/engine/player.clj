@@ -44,3 +44,7 @@
 (defn clear-player-prompt
   [player]
   (update player :prompt-state prompt-state/clear-prompt))
+
+(defn credits
+  [player]
+  (:credits player))

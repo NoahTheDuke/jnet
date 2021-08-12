@@ -17,13 +17,12 @@
 (def explain-prompt-state (m/explainer PromptStateSchema))
 
 (defn validate-prompt-state [this]
-  (if (valid-prompt-state? this)
-    this
-    (let [explained-error (explain-prompt-state (into {} this))]
-      (throw (ex-info (str (:player this)
-                           " prompt state isn't valid: "
-                           (pr-str (me/humanize explained-error)))
-                      explained-error)))))
+  (assert (valid-prompt-state? this)
+          (-> (into {} this)
+              (explain-prompt-state)
+              (me/humanize)
+              (pr-str)))
+  this)
 
 (defn make-prompt-state
   [player]
@@ -46,23 +45,22 @@
 (def explain-prompt-opts (m/explainer PromptOptsSchema))
 
 (defn validate-prompt-opts [props]
-  (if (valid-prompt-opts? props)
-    props
-    (let [explained-error (explain-prompt-opts props)]
-      (throw (ex-info (str "Prompt props aren't valid: "
-                           (pr-str (me/humanize explained-error)))
-                      (select-keys explained-error [:errors]))))))
+  (assert (valid-prompt-opts? props)
+          (-> (explain-prompt-opts props)
+              (me/humanize)
+              (pr-str)))
+  props)
 
 (defn set-prompt
-  [this {:keys [select-card header text buttons] :as props}]
-  (validate-prompt-opts props)
-  (-> this
-      (assoc
-        :select-card (if (some? select-card) select-card false)
-        :header (or header "")
-        :text text
-        :buttons (or (not-empty buttons) []))
-      (validate-prompt-state)))
+  [this props]
+  (let [{:keys [select-card header text buttons]} (validate-prompt-opts props)]
+    (-> this
+        (assoc
+          :select-card (if (some? select-card) select-card false)
+          :header (or header "")
+          :text text
+          :buttons (or (not-empty buttons) []))
+        (validate-prompt-state))))
 
 (defn clear-prompt
   [this]
@@ -73,3 +71,11 @@
         :text ""
         :buttons [])
       (validate-prompt-state)))
+
+(defn prompt-text
+  [game player]
+  (get-in game [player :prompt-state :text]))
+
+(defn prompt-header
+  [game player]
+  (get-in game [player :prompt-state :header]))

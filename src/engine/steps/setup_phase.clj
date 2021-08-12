@@ -9,13 +9,15 @@
   (simple-step
     (fn [game]
       (-> game
-          (update-in [:corp :deck] shuffle)
-          (update-in [:runner :deck] shuffle)))))
+          (assoc-in [:corp :credits] 5)
+          (assoc-in [:runner :credits] 5)))))
 
 (defn draw-initial-hands []
   (simple-step
     (fn [game]
       (-> game
+          (update-in [:corp :deck] shuffle)
+          (update-in [:runner :deck] shuffle)
           (draw/draw :corp 5)
           (draw/draw :runner 5)))))
 

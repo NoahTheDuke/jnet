@@ -33,6 +33,18 @@
        (:messages)
        (mapv #(dissoc % :date))))
 
+(defn prompt-fmt
+  [game player]
+  (let [prompt (get-in game [player :prompt-state])
+        header (:header prompt)
+        text (:text prompt)
+        buttons (:buttons prompt)]
+    (println
+      (str player ": " header "\n"
+           text "\n"
+           (str/join "\n" (map #(str "[ " (:text %) " ]") buttons)))))
+  game)
+
 ; (defn qty [card amt]
 ;   (when (pos? amt)
 ;     (repeat amt card)))

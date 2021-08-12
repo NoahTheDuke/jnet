@@ -12,12 +12,11 @@
     step/BaseStepSchema
     [:map {:closed true}
      [:complete? boolean?]
-     [:active-condition [:or
-                         [:enum :corp :runner]
-                         [:=> [:cat step/BaseStepSchema :map :keyword] :boolean]]]
-     [:active-prompt [:=> [:cat step/BaseStepSchema :map :keyword] :any]]
-     [:waiting-prompt [:=> [:cat step/BaseStepSchema :map :keyword] :any]]
-     [:on-prompt-clicked [:=> [:cat step/BaseStepSchema :map [:enum :corp :runner] :string]
+     [:active-condition
+      [:or [:enum :corp :runner] [:=> [:cat :map :map :keyword] :boolean]]]
+     [:active-prompt [:=> [:cat :map :map :keyword] :map]]
+     [:waiting-prompt [:=> [:cat :map :map :keyword] :map]]
+     [:on-prompt-clicked [:=> [:cat :map :map [:enum :corp :runner] :string]
                           [:cat :boolean :any]]]]))
 
 (def validate-prompt-step (m/validator PromptStepSchema))
@@ -56,7 +55,9 @@
 (defn set-prompt
   [{:keys [active-condition] :as this} game]
   (let [[active-player waiting-player]
-        (if (active-condition this game :corp) [:corp :runner] [:runner :corp])]
+        (if (active-condition this game :corp)
+          [:corp :runner]
+          [:runner :corp])]
     (-> game
         (set-active-prompt active-player this)
         (set-waiting-prompt waiting-player this))))

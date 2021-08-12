@@ -37,4 +37,3 @@
     {:active-condition player
      :active-prompt mulligan-active-prompt
      :on-prompt-clicked mulligan-prompt-clicked}))
-
