@@ -11,13 +11,12 @@
           {:text [{:name "Corp player"} "draws 1 card for their mandatory draw."]}]
          (-> (game/start-new-game {:corp {:user {:username "Corp player"}}
                                    :runner {:user {:username "Runner player"}}})
-             (second)
              (click-prompt :corp "Keep")
              (click-prompt :runner "Keep")
              (get-messages)))))
 
 (deftest mulligan-prompt-test
-  (let [game (second (game/start-new-game nil))]
+  (let [game (game/start-new-game nil)]
     (is (= "Mulligan"
            (prompt-state/prompt-header game :corp)))
     (is (= "Keep or mulligan this hand?"

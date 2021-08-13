@@ -1,34 +1,34 @@
 (ns engine.steps.start-of-turn-phase
   (:require
-   [engine.steps.step :as step :refer [simple-step]]
+   [engine.macros :refer [queue-simple-step]]
+   [engine.pipeline :refer [queue-step]]
    [engine.steps.phase :as phase]))
 
-(defn gain-allotted-clicks []
-  (simple-step
-    (fn [game]
-      (let [active-player (:active-player game)
-            default (get-in game [active-player :clicks-per-turn])]
-        (assoc-in game [active-player :clicks] default)))))
+(defn gain-allotted-clicks [game]
+  (queue-simple-step game
+    (let [active-player (:active-player game)
+          default (get-in game [active-player :clicks-per-turn])]
+      (assoc-in game [active-player :clicks] default))))
 
 (defn start-of-turn-paw
   "Stub until PAWs are developed"
-  []
-  (simple-step (fn [game] game)))
+  [game]
+  (queue-simple-step game game))
 
 (defn refill-recurring-credits
   "Stub until recurring credits are developed"
-  []
-  (simple-step (fn [game] game)))
+  [game]
+  (queue-simple-step game game))
 
 (defn trigger-start-of-turn-abilities
   "Stub until abilities and conditional abilities are developed"
-  []
-  (simple-step (fn [game] game)))
+  [game]
+  (queue-simple-step game game))
 
 (defn checkpoint
   "Stub until checkpoints are developed"
-  []
-  (simple-step (fn [game] game)))
+  [game]
+  (queue-simple-step game game))
 
 (defn start-of-turn-phase
   "* click allotment
@@ -36,11 +36,11 @@
   * recurring credits
   * “when your turn begins”
   * checkpoint"
-  []
-  (phase/make-phase
+  [game]
+  (phase/phase-step game
     {:phase :start-of-turn
-     :steps [(gain-allotted-clicks)
-             (start-of-turn-paw)
-             (refill-recurring-credits)
-             (trigger-start-of-turn-abilities)
-             (checkpoint)]}))
+     :steps [gain-allotted-clicks
+             start-of-turn-paw
+             refill-recurring-credits
+             trigger-start-of-turn-abilities
+             checkpoint]}))

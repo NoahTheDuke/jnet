@@ -1,6 +1,7 @@
-(ns engine.draw)
+(ns engine.draw
+  (:require [engine.macros :refer [defeffect-full]]))
 
-(defn draw
+(defeffect-full draw
   [game player amount]
   (let [[drawn deck] (split-at amount (get-in game [player :deck]))]
     (-> game

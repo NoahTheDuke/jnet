@@ -11,17 +11,15 @@
 (deftest action-phase-prompt-test
   (is (= "You have 3 clicks. Choose an action."
          (-> (game/new-game nil)
-             (pipeline/queue-step (sut/action-phase :corp))
+             (sut/action-phase :corp)
              (pipeline/continue-game)
-             (second)
              (prompt-state/prompt-text :corp)))))
 
 (deftest action-phase-buttons-test
   (is (= 1
          (-> (game/new-game nil)
-             (pipeline/queue-step (sut/action-phase :corp))
+             (sut/action-phase :corp)
              (pipeline/continue-game)
-             (second)
              (click-prompt :corp "[click] Gain 1[c].")
              (:corp)
              (player/credits)))))

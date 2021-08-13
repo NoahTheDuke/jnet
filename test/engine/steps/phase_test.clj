@@ -3,6 +3,7 @@
    [clojure.test :refer [deftest is testing]]
    [engine.game :as game]
    [engine.pipeline :as pipeline]
+   [engine.test-helper :refer [block-step]]
    [engine.steps.step :as step]
    [engine.steps.phase :as sut]))
 
@@ -17,14 +18,12 @@
         step3 (step/simple-step (fn [g] g))]
     (is (= [step1 step2 step3]
            (-> (game/new-game nil)
-               (sut/queue-phase-steps [step1 step2 step3])
+               (sut/queue-phase-steps [#(pipeline/queue-step % step1) #(pipeline/queue-step % step2) #(pipeline/queue-step % step3)])
                (get-in [:gp :queue]))))))
 
 (deftest make-phase-test
-  (let [step1 (step/make-base-step
-                {:continue-step (fn [_ g] [false g])})
-        step2 (step/simple-step (fn [g] g))
-        step3 (step/simple-step (fn [g] g))]
+  (let [step1 (step/simple-step (fn [g] g))
+        step2 (step/simple-step (fn [g] g))]
     (is (= 1 (-> (game/new-game nil)
                  (pipeline/queue-step (sut/make-phase))
                  (get-in [:gp :queue])
@@ -38,22 +37,19 @@
     (testing "steps are queued"
       (is (= 4 (-> (game/new-game nil)
                    (pipeline/queue-step (sut/make-phase
-                                      {:steps [step1 step2 step3]}))
+                                      {:steps [block-step #(pipeline/queue-step % step1) #(pipeline/queue-step % step2)]}))
                    (pipeline/continue-game)
-                   (second)
                    (get-in [:gp :pipeline])
                    (count)))))
     (is (= :phase/start-of-turn
            (-> (game/new-game nil)
                (pipeline/queue-step (sut/make-phase
                                   {:phase :phase/start-of-turn
-                                   :steps [step1]}))
+                                   :steps [block-step]}))
                (pipeline/continue-game)
-               (second)
                (:current-phase))))
     (is (nil? (-> (game/new-game nil)
                   (pipeline/queue-step (sut/make-phase
                                      {:phase :phase/start-of-turn}))
                   (pipeline/continue-game)
-                  (second)
                   (:current-phase))))))

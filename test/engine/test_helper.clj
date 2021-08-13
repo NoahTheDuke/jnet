@@ -3,12 +3,27 @@
    [clojure.string :as str]
    [engine.data :as data]
    [engine.pipeline :as pipeline]
+   [engine.steps.step :as step]
    [malli.dev :as dev]
    [malli.dev.pretty :as pretty]))
 
 (dev/start! {:report (pretty/reporter)})
 
 (data/load-card-data)
+
+;A record that does nothing but block, useful if you want to stop and check the state
+(defrecord BlockStep
+[uuid]
+step/Step
+(blocking [this game] game)
+(continue-step [this game] game)
+(validate [this] true))
+
+
+
+(defn block-step
+  [game]
+  (pipeline/queue-step game (BlockStep. (java.util.UUID/randomUUID))))
 
 (defn click-prompt
   [game player button]
@@ -18,10 +33,7 @@
                           (:buttons prompt))]
     (if foundButton
       (-> game
-          (pipeline/handle-prompt-clicked player (:arg foundButton))
-          (second)
-          (pipeline/continue-game)
-          (second))
+          (pipeline/handle-prompt-clicked player (:arg foundButton)))
       (throw (ex-info (str "Can't find " button
                            " in current prompt for " player)
                       {:data prompt})))))

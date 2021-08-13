@@ -2,7 +2,7 @@
   (:require
    [engine.draw :as draw]
    [engine.messages :as msg]
-   [engine.pipeline :as pipeline]
+   [engine.pipeline :as pipeline :refer [queue-step]]
    [engine.steps.prompt :as prompt]))
 
 (defn mulligan-active-prompt
@@ -18,22 +18,21 @@
                   "{0} has kept their hand"
                   "{0} has taken a mulligan")
         game (-> game
-                 (pipeline/complete-current-step)
                  (msg/add-message message [(get game player)]))]
     (if (= arg "keep")
-      [true game]
+      game
       (let [hand (get-in game [player :hand])
             deck (get-in game [player :deck])
             new-deck (->> deck
                           (concat hand)
                           (shuffle)
                           (into []))]
-        [true (-> game
-                  (assoc [player :deck] new-deck)
-                  (draw/draw player 5))]))))
+        (-> game
+          (assoc [player :deck] new-deck)
+          (draw/draw player 5))))))
 
-(defn mulligan-prompt [player]
-  (prompt/base-prompt
+(defn mulligan-prompt [game player]
+  (queue-step game (prompt/base-prompt
     {:active-condition player
      :active-prompt mulligan-active-prompt
-     :on-prompt-clicked mulligan-prompt-clicked}))
+     :on-prompt-clicked mulligan-prompt-clicked})))

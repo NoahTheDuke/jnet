@@ -2,6 +2,7 @@
   (:require
    [engine.pipeline :as pipeline]
    [engine.player :as player]
+   [engine.macros :refer [queue-simple-step]]
    [engine.steps.step :as step]
    [engine.steps.setup-phase :as setup-phase]
    [engine.steps.draw-phase :as draw-phase]
@@ -18,16 +19,13 @@
    :messages []
    :turns 0})
 
-(defn begin-turn []
-  (step/simple-step
-    (fn [game]
-      (-> game
-          (pipeline/queue-step (sot-phase/start-of-turn-phase))
-          (pipeline/queue-step (draw-phase/draw-phase))))))
+(defn begin-turn [game]
+  (-> game (sot-phase/start-of-turn-phase)
+           (draw-phase/draw-phase)))
 
 (defn start-new-game
   [opts]
   (-> (new-game opts)
-      (pipeline/queue-step (setup-phase/setup-phase))
-      (pipeline/queue-step (begin-turn))
+      (setup-phase/setup-phase)
+      (begin-turn)
       (pipeline/continue-game)))

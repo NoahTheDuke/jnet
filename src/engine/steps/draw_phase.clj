@@ -3,17 +3,19 @@
    [engine.draw :as draw]
    [engine.messages :as msg]
    [engine.steps.phase :as phase]
-   [engine.steps.step :as step :refer [simple-step]]))
+   [engine.pipeline :refer [queue-step]]
+   [engine.macros :refer [queue-simple-step]]))
 
-(defn mandatory-draw []
-  (simple-step
-    (fn [game]
+(defn mandatory-draw [game]
+  (queue-simple-step game
       (-> game
           (msg/add-message "{0} draws 1 card for their mandatory draw." [(:corp game)])
-          (draw/draw :corp 1)))))
+          (draw/draw :corp 1))))
 
-(defn draw-phase []
-  (phase/make-phase
-    {:phase :draw
-     :condition (fn [game] (= :corp (:active-player game)))
-     :steps [(mandatory-draw)]}))
+(defn draw-phase [game]
+  (queue-simple-step game
+    (if (= :corp (:active-player game))
+        (phase/phase-step game
+          {:phase :draw
+           :steps [mandatory-draw]})
+        game)))
