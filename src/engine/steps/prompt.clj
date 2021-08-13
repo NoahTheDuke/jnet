@@ -84,7 +84,8 @@
   (->> {:active-condition
         (cond
           (fn? active-condition) active-condition
-          (keyword? active-condition) (fn [_this _game player] (= player active-condition)))
+          (keyword? active-condition) (fn [_this _game player]
+                                        (= player active-condition)))
         :active-prompt active-prompt
         :waiting-prompt {:text (or waiting-text "Waiting for opponent")}
         :complete? false
@@ -106,9 +107,9 @@
 (defn handler-on-prompt-clicked
   [choices]
   (fn [_this game _player arg]
-    (if-let [choic (get choices arg)]
+    (if-let [choice (get choices arg)]
       [true (-> game
-                (choic)
+                (choice)
                 (pipeline/complete-current-step))]
       [false game])))
 
@@ -125,10 +126,9 @@
 (def explain-handler-props (m/explainer HandlerPromptPropsSchema))
 
 (defn handler-prompt
-  [props]
-  (assert (validate-handler-props props) (me/humanize (explain-handler-props props)))
-  (let [{:keys [active-condition active-text waiting-text choices]} props
-        buttons (mapv (fn [k] {:text k :arg k}) (keys choices))]
+  [{:keys [active-condition active-text waiting-text choices] :as props}]
+  (let [buttons (mapv (fn [k] {:text k :arg k}) (keys choices))]
+    (assert (validate-handler-props props) (me/humanize (explain-handler-props props)))
     (base-prompt
       {:active-condition active-condition
        :waiting-text waiting-text

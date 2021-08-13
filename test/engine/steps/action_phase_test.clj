@@ -19,7 +19,7 @@
              (assoc-in [:corp :clicks] 3)
              (pipeline/queue-step (sut/action-window))
              (pipeline/continue-game)
-             (click-prompt :corp "[click] Gain 1[c].")
+             (click-prompt :corp "[click]: Gain 1[c].")
              (prompt-state/prompt-text :corp)))))
 
 (deftest action-window-buttons-test
@@ -27,14 +27,14 @@
          (-> (game/new-game nil)
              (pipeline/queue-step (sut/action-window))
              (pipeline/continue-game)
-             (click-prompt :corp "[click] Gain 1[c].")
+             (click-prompt :corp "[click]: Gain 1[c].")
              (:corp)
              (:credits))))
   (is (= -1
          (-> (game/new-game nil)
              (pipeline/queue-step (sut/action-window))
              (pipeline/continue-game)
-             (click-prompt :corp "[click] Gain 1[c].")
+             (click-prompt :corp "[click]: Gain 1[c].")
              (:corp)
              (:clicks)))))
 
@@ -43,6 +43,6 @@
                  (assoc-in [:corp :clicks] 2)
                  (pipeline/queue-step (sut/action-phase))
                  (pipeline/continue-game)
-                 (click-prompt :corp "[click] Gain 1[c]."))]
+                 (click-prompt :corp "[click]: Gain 1[c]."))]
     (is (= "You have 1 clicks. Choose an action." (prompt-state/prompt-text game :corp)))
     (is (= :phase/action (:current-phase game)))))

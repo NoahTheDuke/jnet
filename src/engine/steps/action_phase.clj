@@ -13,7 +13,7 @@
      :text (str "You have " clicks " clicks."
                 (when (pos? clicks)
                   " Choose an action."))
-     :buttons [{:text "[click] Gain 1[c]." :arg "credit"}]}))
+     :buttons [{:text "[click]: Gain 1[c]." :arg "credit"}]}))
 
 (defn action-prompt-clicked
   [_this game player _arg]

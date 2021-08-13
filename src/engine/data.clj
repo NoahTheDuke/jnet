@@ -3,9 +3,27 @@
     [engine.card :as card]
     [clojure.java.io :as io]
     [clojure.set :as set]
+    [clojure.string :as str]
     [clojure.edn :as edn]))
 
-(def card-data (atom nil))
+(defn normalize-text [s]
+  (some-> (not-empty s)
+          (name)
+          (java.text.Normalizer/normalize java.text.Normalizer$Form/NFD)
+          (str/replace #"[\P{ASCII}]+" "")
+          (str/trim)))
+
+(defn slugify
+  "As defined here: https://you.tools/slugify/"
+  ([s] (slugify s "-"))
+  ([s sep]
+   (if (nil? s) ""
+     (as-> s s
+       (normalize-text s)
+       (str/lower-case s)
+       (str/split s #"[\p{Space}\p{Punct}]+")
+       (filter seq s)
+       (str/join sep s)))))
 
 (defn clean-card-data
   "This won't be necessary after all work is complete and we switch to this engine,
@@ -22,10 +40,12 @@
                         :normalizedtitle :id
                         :title :name
                         :trash :trash-cost})
-      (update :faction keyword)
-      (update :side keyword)
-      (update :subtypes #(mapv keyword %))
-      (update :type keyword)))
+      (update :faction (comp keyword slugify))
+      (update :side (comp keyword slugify))
+      (update :subtypes #(mapv (comp keyword slugify) %))
+      (update :type (comp keyword slugify))))
+
+(def card-data (atom nil))
 
 (defn load-card-data []
   (->> (io/resource "engine/raw_data.edn")
@@ -37,3 +57,11 @@
        (map (juxt :id identity))
        (into {})
        (reset! card-data)))
+
+(defn prepare-deck
+  [{:keys [identity cards]}]
+  (let [deck (->> cards
+                  (mapcat #(repeat (:qty %) (:name %)))
+                  (mapv #(get @card-data %)))]
+    {:deck-list deck
+     :identity (get @card-data identity)}))

@@ -10,6 +10,9 @@
 
 (data/load-card-data)
 
+(defn make-card [id]
+  (get @data/card-data id))
+
 (defn click-prompt
   [game player button]
   (let [prompt (get-in game [player :prompt-state])
