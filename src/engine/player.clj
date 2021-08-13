@@ -22,7 +22,7 @@
 (defn new-corp [opts]
   (merge
     (new-player opts)
-    {:prompt-state (prompt-state/make-prompt-state :corp)
+    {:prompt-state (prompt-state/make-prompt-state)
      :bad-publicity {:base 0
                      :additional 0}
      :clicks-per-turn 3}))
@@ -30,7 +30,7 @@
 (defn new-runner [opts]
   (merge
     (new-player opts)
-    {:prompt-state (prompt-state/make-prompt-state :runner)
+    {:prompt-state (prompt-state/make-prompt-state)
      :brain-damage 0
      :clicks-per-turn 4
      :link 0

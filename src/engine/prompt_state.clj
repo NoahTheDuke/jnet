@@ -3,11 +3,10 @@
    [malli.core :as m]
    [malli.error :as me]))
 
-(defrecord PromptState [player select-card header text buttons])
+(defrecord PromptState [select-card header text buttons])
 
 (def PromptStateSchema
   [:map {:closed true}
-   [:player [:enum :corp :runner]]
    [:select-card boolean?]
    [:header string?]
    [:text string?]
@@ -25,9 +24,8 @@
   this)
 
 (defn make-prompt-state
-  [player]
-  (-> {:player player
-       :select-card false
+  []
+  (-> {:select-card false
        :header ""
        :text ""
        :buttons []}
