@@ -30,17 +30,16 @@
                  (get-in [:gp :queue])
                  (count))))
     (testing "without steps, start and end happen immediately"
-      (is (= 0 (-> (game/new-game nil)
-                   (pipeline/queue-step (sut/make-phase))
-                   (pipeline/continue-game)
-                   (get-in [:gp :queue])
-                   (count)))))
+      (is (zero? (-> (game/new-game nil)
+                     (pipeline/queue-step (sut/make-phase))
+                     (pipeline/continue-game)
+                     (get-in [:gp :queue])
+                     (count)))))
     (testing "steps are queued"
       (is (= 4 (-> (game/new-game nil)
                    (pipeline/queue-step (sut/make-phase
                                       {:steps [step1 step2 step3]}))
                    (pipeline/continue-game)
-                   (second)
                    (get-in [:gp :pipeline])
                    (count)))))
     (is (= :phase/start-of-turn
@@ -49,11 +48,9 @@
                                   {:phase :phase/start-of-turn
                                    :steps [step1]}))
                (pipeline/continue-game)
-               (second)
                (:current-phase))))
     (is (nil? (-> (game/new-game nil)
                   (pipeline/queue-step (sut/make-phase
                                      {:phase :phase/start-of-turn}))
                   (pipeline/continue-game)
-                  (second)
                   (:current-phase))))))

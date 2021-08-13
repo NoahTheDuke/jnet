@@ -2,7 +2,7 @@
   (:require
    [clojure.test :refer [deftest is testing]]
    [engine.game :as sut]
-   [engine.test-helper :refer [click-prompt]]))
+   [engine.helper-test :refer [click-prompt]]))
 
 (deftest new-game-test
   (testing "pipeline exists"
@@ -18,7 +18,6 @@
 (deftest corp-turn-test
   (is (= 6 (-> (sut/start-new-game {:corp {:user {:username "Corp player"}
                                            :deck [:a :b :c :d :e :f :g :h :i :j]}})
-               (second)
                (click-prompt :corp "Keep")
                (click-prompt :runner "Keep")
                (get-in [:corp :hand])

@@ -81,7 +81,7 @@
 (deftest continue-gp-test
   (testing "returns true by default"
     (let [game (game/new-game nil)]
-      (is (= [true game] (sut/continue-game game)))))
+      (is (= game (sut/continue-game game)))))
   (testing "updates the pipeline"
     (let [step (step/make-base-step
                  {:continue-step
@@ -89,14 +89,14 @@
           game (-> (game/new-game nil)
                    (sut/queue-step step))]
       (is (= {:pipeline [step] :queue []}
-             (:gp (second (sut/continue-game game)))))))
+             (:gp (sut/continue-game game))))))
   (testing "calls 'continue-step' on current step"
     (let [step (step/make-base-step
                  {:continue-step
                   (fn [_step _game] [false :foo])})
           game (-> (game/new-game nil)
                    (sut/queue-step step))]
-      (is (= [false :foo] (sut/continue-game game)))))
+      (is (= :foo (sut/continue-game game)))))
   (testing "drops the current step if 'continue-step' returns true"
     (let [step (step/make-base-step
                  {:continue-step
@@ -104,7 +104,7 @@
           game (-> (game/new-game nil)
                    (sut/queue-step step)
                    (sut/continue-game))]
-      (is (= {:pipeline [] :queue []} (:gp (second game)))))))
+      (is (= {:pipeline [] :queue []} (:gp game))))))
 
 (deftest handle-prompt-clicked-test
   (testing "returns false by default"
@@ -117,9 +117,9 @@
           game (-> (game/new-game nil)
                    (sut/queue-step step))]
       (is (= {:pipeline [] :queue [step]}
-             (->> (sut/handle-prompt-clicked game :corp "button")
-                  (second)
-                  (:gp))))))
+             (-> (sut/handle-prompt-clicked game :corp "button")
+                 (second)
+                 (:gp))))))
   (testing "returns false if pipeline is empty"
     (let [step (prompt/base-prompt
                  {:active-prompt (constantly {:text "text"})

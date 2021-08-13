@@ -34,8 +34,8 @@
       (let [[result new-game] (step/continue-step step game)]
         (if result
           (recur (drop-current-step new-game))
-          [false new-game]))
-      [true game])))
+          new-game))
+      game)))
 
 (defn handle-prompt-clicked
   [game player button]

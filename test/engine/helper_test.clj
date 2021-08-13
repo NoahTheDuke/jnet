@@ -1,4 +1,4 @@
-(ns engine.test-helper
+(ns engine.helper-test
   (:require
    [clojure.string :as str]
    [engine.data :as data]
@@ -20,8 +20,7 @@
       (-> game
           (pipeline/handle-prompt-clicked player (:arg foundButton))
           (second)
-          (pipeline/continue-game)
-          (second))
+          (pipeline/continue-game))
       (throw (ex-info (str "Can't find " button
                            " in current prompt for " player)
                       {:data prompt})))))

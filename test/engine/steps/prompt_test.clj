@@ -6,7 +6,7 @@
    [engine.pipeline :as pipeline]
    [engine.prompt-state :as prompt-state]
    [engine.steps.prompt :as sut]
-   [engine.test-helper :refer [click-prompt]]))
+   [engine.helper-test :refer [click-prompt]]))
 
 (deftest make-prompt-test
   (let [active-condition (constantly true)
@@ -74,8 +74,7 @@
                   :active-prompt (constantly active-prompt)})
           game (-> (game/new-game {})
                    (pipeline/queue-step step)
-                   (pipeline/continue-game)
-                   (second))]
+                   (pipeline/continue-game))]
       (is (= (:header active-prompt)
              (prompt-state/prompt-header game :corp)))
       (is (= (:text active-prompt)
@@ -91,8 +90,7 @@
           {:keys [corp runner]} (-> (game/new-game {})
                                     (pipeline/queue-step step)
                                     (assoc-in [:gp :queue 0 :complete?] true)
-                                    (pipeline/continue-game)
-                                    (second))]
+                                    (pipeline/continue-game))]
       (is (= "" (get-in corp [:prompt-state :header])))
       (is (= "" (get-in corp [:prompt-state :text])))
       (is (= "" (get-in runner [:prompt-state :text]))))))
@@ -110,19 +108,16 @@
            (-> (game/new-game nil)
                (pipeline/queue-step step)
                (pipeline/continue-game)
-               (second)
                (prompt-state/prompt-text :corp))))
     (is (= "Corp to draw"
            (-> (game/new-game nil)
                (pipeline/queue-step step)
                (pipeline/continue-game)
-               (second)
                (prompt-state/prompt-text :runner))))
     (is (= 2
            (-> (game/new-game {:corp {:deck [:a :b :c]}})
                (pipeline/queue-step step)
                (pipeline/continue-game)
-               (second)
                (click-prompt :corp "Draw 2")
                (get-in [:corp :hand])
                (count))))))
