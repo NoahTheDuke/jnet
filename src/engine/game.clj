@@ -2,7 +2,6 @@
   (:require
    [engine.pipeline :as pipeline]
    [engine.player :as player]
-   [engine.macros :refer [queue-simple-step]]
    [engine.steps.step :as step]
    [engine.steps.setup-phase :as setup-phase]
    [engine.steps.draw-phase :as draw-phase]

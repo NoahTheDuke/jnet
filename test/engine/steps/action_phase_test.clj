@@ -17,7 +17,7 @@
 
 (deftest action-phase-buttons-test
   (is (= 1
-         (-> (game/new-game nil)
+         (-> (game/new-game {:corp {:credits 0}})
              (sut/action-phase :corp)
              (pipeline/continue-game)
              (click-prompt :corp "[click] Gain 1[c].")

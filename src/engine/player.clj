@@ -3,7 +3,7 @@
     [engine.prompt-state :as prompt-state]))
 
 (defn new-player
-  [{:keys [user identity deck]}]
+  [{:keys [user identity deck credits]}]
   {:deck-list (or deck [])
    :deck (or deck [])
    :discard []
@@ -14,7 +14,7 @@
    :rfg []
    :scored []
    :set-aside []
-   :credits 0
+   :credits (or credits 5)
    :clicks 0
    :agenda-points 0
    :name (:username user)})

@@ -29,7 +29,7 @@
                           (into []))]
         (-> game
           (assoc [player :deck] new-deck)
-          (draw/draw player 5))))))
+          (draw/draw-unsafe player 5))))))
 
 (defn mulligan-prompt [game player]
   (queue-step game (prompt/base-prompt

@@ -7,19 +7,16 @@
    [engine.steps.step :as step]
    [engine.steps.phase :as sut]))
 
-(deftest initialize-steps-test
-  (is (= 2 (count (sut/initialize-steps nil))))
-  (is (= 3 (count (sut/initialize-steps
-                    {:steps [(step/simple-step (constantly :foo))]})))))
-
 (deftest queue-steps-test
   (let [step1 (step/simple-step (fn [g] g))
         step2 (step/simple-step (fn [g] g))
         step3 (step/simple-step (fn [g] g))]
     (is (= [step1 step2 step3]
            (-> (game/new-game nil)
-               (sut/queue-phase-steps [#(pipeline/queue-step % step1) #(pipeline/queue-step % step2) #(pipeline/queue-step % step3)])
-               (get-in [:gp :queue]))))))
+               (sut/queue-phase-steps {:steps #(-> % (pipeline/queue-step step1) (pipeline/queue-step step2) (pipeline/queue-step step3))})
+               (get-in [:gp :queue])
+               (rest)
+               (drop-last))))))
 
 (deftest make-phase-test
   (let [step1 (step/simple-step (fn [g] g))
@@ -37,7 +34,7 @@
     (testing "steps are queued"
       (is (= 4 (-> (game/new-game nil)
                    (pipeline/queue-step (sut/make-phase
-                                      {:steps [block-step #(pipeline/queue-step % step1) #(pipeline/queue-step % step2)]}))
+                                      {:steps #(-> % (block-step) (pipeline/queue-step step1) (pipeline/queue-step step2))}))
                    (pipeline/continue-game)
                    (get-in [:gp :pipeline])
                    (count)))))
@@ -45,7 +42,7 @@
            (-> (game/new-game nil)
                (pipeline/queue-step (sut/make-phase
                                   {:phase :phase/start-of-turn
-                                   :steps [block-step]}))
+                                   :steps block-step}))
                (pipeline/continue-game)
                (:current-phase))))
     (is (nil? (-> (game/new-game nil)

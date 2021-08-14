@@ -43,7 +43,7 @@
 (def BaseStepSchema
   [:map {:closed true}
    [:continue-step [:=> [:cat :any :map]
-                    [:cat :any]]]
+                    [:cat :map]]]
    [:type [:qualified-keyword {:namespace :step}]]
    [:uuid uuid?]])
 
@@ -82,3 +82,4 @@
 (defn simple-step
   [continue-step]
   (make-base-step {:continue-step (simple-step-wrapper continue-step)}))
+

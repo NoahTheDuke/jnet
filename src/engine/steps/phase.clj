@@ -1,40 +1,30 @@
 (ns engine.steps.phase
   (:require
    [engine.pipeline :as pipeline]
-   [engine.macros :refer [queue-simple-step]]
    [engine.steps.step :refer [simple-step]]
+   [engine.macros :refer [defstep as-step]]
    [malli.core :as m]))
 
-(defn start-phase
+(defstep start-phase
   [game phase]
-  (queue-simple-step game
-      (-> game
-          (assoc :current-phase (keyword "phase" (name phase))))))
+    (-> game
+        (assoc :current-phase (keyword "phase" (name phase)))))
 
-(defn end-phase [game]
-  (queue-simple-step game
-      (-> game
-          (assoc :current-phase nil))))
-
-(defn initialize-steps
-  [{:keys [phase steps]
-    :or {phase :base}}]
-  (let [start-step #(start-phase % phase)
-        end-step end-phase]
-    (-> [start-step]
-        (into steps)
-        (into [end-step]))))
+(defstep end-phase [game]
+  (-> game
+      (assoc :current-phase nil)))
 
 (defn queue-phase-steps
-  [game steps]
-  ;(apply -> game steps) Can't apply macros =(
-  (reduce (fn [game step] (step game)) game steps))
+  [game {:keys [phase steps]
+         :or {phase :base steps identity}}]
+  (-> game (start-phase phase)
+           (steps)
+           (end-phase)))
 
 (def PhaseOptsSchema
   [:map {:closed true}
-   [:condition {:optional true} [:=> [:cat :map] :boolean]]
    [:phase {:optional true} :keyword]
-   [:steps {:optional true} [:* :any]]])
+   [:steps {:optional true} [:=> [:cat :map] [:cat :map]]]])
 
 (def validate-opts (m/validator PhaseOptsSchema))
 (def explain-opts (m/explainer PhaseOptsSchema))
@@ -47,8 +37,8 @@
    (assert (validate-opts opts) (:errors (explain-opts opts)))
    (-> (simple-step
          (fn [game]
-           (queue-phase-steps game (initialize-steps opts))))
+           (queue-phase-steps game opts)))
        (assoc :type :step/phase))))
 
-(defn phase-step [game & args]
+(defn phase [game & args]
   (pipeline/queue-step game (apply make-phase args)))

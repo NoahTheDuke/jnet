@@ -2,7 +2,6 @@
   (:require
    [engine.messages :as msg]
    [engine.pipeline :as pipeline :refer [queue-step]]
-   [engine.macros :refer [queue-simple-step]]
    [engine.steps.prompt :as prompt]))
 
 (defn action-active-prompt

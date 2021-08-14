@@ -1,11 +1,11 @@
 Terminology:
 
-Note that "changing the game state" does not include adding things to the queue or otherwise manipulating the internal state of the engine. It means in game state.
+Note that "changing the game state" does not include adding things to the queue or otherwise manipulating the internal state of the engine. It means in game state.  
 
-Effect Step: Basic indivisible units of game state change. Things like drawing cards, gaining credits or the steps of a timing structure fall into this. No other steps may change the game state. 
+Effect Step: Basic indivisible units of game state change. Things like drawing cards, gaining credits or the steps of a timing structure fall into this.  
 Blocking Step: A step that causes the engine to stop what it's doing and wait for something. Usually it'll be waiting on a user because of a prompt. 
-Guard Step: A step that does nothing in itself but that can be aborted to by a special effect step. Each guard step has a keyword type associated with it. 
-Composite Step: All other steps. These steps never do anything other than add steps to the queue, potentially after examining the game state. simple-step gives composite steps.
+Guard Step: A step that is aborted to by the abort step (which is an effect step). Any effect type can be used for this purpose. 
+Composite Step: All other steps. These steps never do anything other than add steps (including effect steps) to the queue, potentially after examining the game state. simple-step gives composite steps.
 Composite Call: A composite step that can be used directly, in addition to queuing it. Composite calls should not depend on game state. Note that the distinction between a composition step and a composite call is in how the revelant function is defined not in how it is used. 
 
 Prompt Step: A blocking step. Displays a custom prompt to the user. 
@@ -14,39 +14,50 @@ Action Step: A blocking step. Represents the action phase ability window.
 
 Interrupt Check Step: A composite step. Represents an interrupt window. 
 
-Checkpoint Step: An effect step. Must be requested manually when required by the engine or cards. Acts as a blocking step for the purposes of the pending instruction.
+Checkpoint Step: An effect step. Must be requested manually when required by the engine or cards. Acts as a blocking step for the purposes of the imminent instruction. 
 Imminent Instruction: The series of steps between the start of the pipeline and the next blocking step or checkpoint step. 
-Expected Effects: The results of a process via which the interrupt system determines which effect steps will run before the next checkpoint.
-
-#I think this is the best way to handle checkpoints and pending instructions.
-
-Pipeline: The pipeline system itself. It just knows how to click prompts, build diffs and run steps.
-Core: The suite supporting functions/macros that allow you to manipulate the pipeline easily. 
-Engine: The game rules. Timing steps, effects and functions for examining the state.
-Cards: The cards.
+Expected Effects: The results of a process via which the interrupt system determines which effect steps will run before the next checkpoint. 
 
 -----------
 
 pipeline Workings:
-The pipeline runs with a simple (swap! @game handle-prompt-clicked action). handle-prompt-clicked will give the action to the prompt at the beginning of the pipeline then call continue-game.
+The pipeline runs with a simple (swap! @game handle-prompt-clicked player action). handle-prompt-clicked will give the action to the prompt at the beginning of the pipeline then call continue-game.
 
-Each invocation other than the first, the kernel expects to be given the action (e.g. prompt click) that caused the invocation. This action is passed to the prompt-clicked method of the first step in the queue prior to the main iteration being performed.
+On each invocation after than the first, the kernel expects to be given the action (e.g. prompt click) that caused the invocation. This action is passed to the prompt-clicked method of the first step in the queue prior to the main iteration being performed.
 
 Each iteration of continue-game performs the following steps:
-Call update-game.
-Call the blocking method of the next step in the queue. If it returns false, continue to the next step, otherwise return whatever the blocking method returned, which should be the game state inc prompt.
-If it returned false, update the game using the continue-step method of the next step and go to the next iteration. 
+Call update-pipeline.
+Call blocking on the next step in the queue. If it returned false, update the game using the continue-step method and go to the next iteration. 
+If it doesn't return false return whatever the blocking method returned, which should be the game state inc prompt.
 
 --------
 
 Engine Workings:
 The majority of engine functions will either be game state reporting functions, which will be hopefully mostly unchanged, or composite steps/calls.
 
-Composite calls mostly follow the form (-> game (step) (step) (step)) and can be defined with a simple defn. They are the simplest and lightest of "steps" in that they needn't be backed by a step record or enter the pipeline at all. Though often they are, which is called a composite step. 
+Composite calls mostly follow the form (-> game (action) (action) (action)) and can be defined with a simple defn. They are the simplest and lightest of "steps" in that they needn't be backed by a step record or enter the pipeline at all. 
 
 Example:
 
 (defn example-composite-call [game some args whatever] (-> game (other-step some args) (more-step whatever)))
+
+If a function examines the game state or recurs, it's known as a composite step and must be defined as a proper step. Like with altering the game state examining the game state is something you must do directly to qualify. A function that draws cards until your hand is full would count because it looks at how many cards you have in hand (i.e. a value that could be altered if there are draw steps in the pipeline). As such this function should be defined as one that queues a step. The effect of the card game day would not count and can be implemented as a simple function, because it can just call that function.
+
+Composite steps that wish to recur must be defined as a proper step and should use (queue-step this) to achieve this. A defn like macro is provided that makes any function a step or the as-step macro provides inline steps. For instance, this function can be safely defined with a simple defn:
+
+(defn simple-call [game] (-> game (blah) (blah) (blah) (as-step (step game (examine-state game))) (blah) (blah) (blah)))
+
+
+Or showing recursion over a prompt:
+
+(-> game (blah) (blah)
+  (as-step (if (mu-limit-exceeded game)
+			   (-> game
+				   (trash-program-prompt)
+				   (queue-step this))
+			   game))
+  (blah) (blah) (blah))
+
 
 As you can see if other-step and more-step were composite calls themselves with similar definitions they'd just immediately have their effect. This is safe because composite steps can only change the pipeline. They have no way to cause triggers or prompts. This means that composite steps are usually expanded before they ever hit the queue. Some composite steps must be true steps, mostly to allow the ablity to (queue-step this) and recur. This method of recursion is the main looping mechanism for the game. 
 

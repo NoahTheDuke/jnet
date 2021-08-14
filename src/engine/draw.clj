@@ -1,5 +1,5 @@
 (ns engine.draw
-  (:require [engine.macros :refer [defeffect-full]]))
+  (:require [engine.steps.effect :refer [defeffect-full]]))
 
 (defeffect-full draw
   [game player amount]
