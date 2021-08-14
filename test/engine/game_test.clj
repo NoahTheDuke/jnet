@@ -2,7 +2,7 @@
   (:require
    [clojure.test :refer [deftest is testing]]
    [engine.game :as sut]
-   [engine.helper-test :refer [click-prompt prompt-fmt]]))
+   [engine.helper-test :refer [click-prompt]]))
 
 (deftest new-game-test
   (testing "pipeline exists"
@@ -10,18 +10,15 @@
   (testing "initial turns set"
     (is (:turns (sut/new-game {})))))
 
-(deftest start-new-game
-  (is (= [:a :b :c]
-         (-> (sut/new-game {:corp {:deck [:a :b :c]}})
-             (get-in [:corp :deck])))))
-
 (deftest corp-turn-test
   (is (= 6 (-> (sut/start-new-game {:corp {:user {:username "Corp player"}
                                            :deck [:a :b :c :d :e :f :g :h :i :j]}})
                (click-prompt :corp "Keep")
                (click-prompt :runner "Keep")
                (get-in [:corp :hand])
-               (count))))
+               (count)))))
+
+(deftest switch-active-player-test
   (is (= :runner
          (-> (sut/start-new-game {:corp {:user {:username "Corp player"}
                                          :deck [:a :b :c :d :e]}})
