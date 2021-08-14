@@ -40,7 +40,8 @@
   (phase/make-phase
     {:phase :start-of-turn
      :steps [(gain-allotted-clicks)
-             (start-of-turn-paw)
-             (refill-recurring-credits)
-             (trigger-start-of-turn-abilities)
-             (checkpoint)]}))
+             ; (start-of-turn-paw)
+             ; (refill-recurring-credits)
+             ; (trigger-start-of-turn-abilities)
+             ; (checkpoint)
+             ]}))

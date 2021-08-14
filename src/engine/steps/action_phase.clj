@@ -38,11 +38,12 @@
   (simple-step
     (fn [{:keys [active-player] :as game}]
       (if (pos? (get-in game [active-player :clicks]))
-        (pipeline/queue-step game (action-window))
+        (-> game
+            (pipeline/queue-step (action-window))
+            (pipeline/queue-step (check-for-more-clicks)))
         game))))
 
 (defn action-phase []
   (phase/make-phase
     {:phase :action
-     :steps [(action-window)
-             (check-for-more-clicks)]}))
+     :steps [(check-for-more-clicks)]}))

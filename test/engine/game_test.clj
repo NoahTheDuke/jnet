@@ -2,7 +2,7 @@
   (:require
    [clojure.test :refer [deftest is testing]]
    [engine.game :as sut]
-   [engine.helper-test :refer [click-prompt]]))
+   [engine.helper-test :refer [click-prompt prompt-fmt]]))
 
 (deftest new-game-test
   (testing "pipeline exists"
@@ -21,4 +21,13 @@
                (click-prompt :corp "Keep")
                (click-prompt :runner "Keep")
                (get-in [:corp :hand])
-               (count)))))
+               (count))))
+  (is (= :runner
+         (-> (sut/start-new-game {:corp {:user {:username "Corp player"}
+                                         :deck [:a :b :c :d :e]}})
+             (click-prompt :corp "Keep")
+             (click-prompt :runner "Keep")
+             (click-prompt :corp "[click]: Gain 1[c].")
+             (click-prompt :corp "[click]: Gain 1[c].")
+             (click-prompt :corp "[click]: Gain 1[c].")
+             (:active-player)))))
