@@ -111,7 +111,7 @@
     (let [game (game/new-game nil)]
       (is (= game (sut/handle-prompt-clicked game :corp "button")))))
   (testing "doesn't update the pipeline"
-    (let [step (prompt/base-prompt
+    (let [step (prompt/base-prompt-step
                  {:active-prompt (constantly {:text "text"})
                   :active-condition :corp
                   :on-prompt-clicked
@@ -122,7 +122,7 @@
              (->> (sut/handle-prompt-clicked game :corp "button")
                   (:gp))))))
   (testing "does nothing if pipeline is empty"
-    (let [step (prompt/base-prompt
+    (let [step (prompt/base-prompt-step
                  {:active-prompt (constantly {:text "text"})
                   :active-condition :corp
                   :on-prompt-clicked
@@ -131,7 +131,7 @@
                    (sut/queue-step step))]
       (is (= game (sut/handle-prompt-clicked game :corp "button")))))
   (testing "calls 'on-prompt-clicked' on current step"
-    (let [step (prompt/base-prompt
+    (let [step (prompt/base-prompt-step
                  {:active-prompt (constantly {:text "text"})
                   :active-condition :corp
                   :on-prompt-clicked

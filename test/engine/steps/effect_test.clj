@@ -6,7 +6,7 @@
    [engine.steps.step :as step]
    [engine.steps.effect :as sut]
    [engine.test-helper :refer [click-prompt]]))
-   
+
 (deftest defeffect-macro-test
   (let [test-effect (macroexpand `(sut/defeffect-full ~'test-effect ~'[game t a] ~'(-> game (blah t) (blah a))))]
     (testing "wraps in do"
@@ -21,8 +21,3 @@
       (is (not (thrown? Exception (test-effect {} nil nil)))))
     (testing "Creates the unsafe function"
       (is (not (thrown? Exception (test-effect-unsafe {} nil nil)))))))
-
-
-
-;(deftest defeffect-macro-test
-  

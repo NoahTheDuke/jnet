@@ -29,7 +29,10 @@
     (if-let [step (get-current-step game)]
       (if-let [prompt-game (step/blocking step game)]
         prompt-game
-        (let [new-game (step/continue-step step game)]
+        (let [new-game (try (step/continue-step step game)
+                            (catch Exception e
+                                   (clojure.pprint/pprint game) ;Todo setup exinfo
+                                   (throw e)))]
           (recur (drop-current-step new-game))))
       game)));This should probably be an error, empty pipeline shouldn't happen
 

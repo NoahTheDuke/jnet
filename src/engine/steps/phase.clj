@@ -17,14 +17,16 @@
 (defn queue-phase-steps
   [game {:keys [phase steps]
          :or {phase :base steps identity}}]
-  (-> game (start-phase phase)
-           (steps)
-           (end-phase)))
+  (let [steps (if (sequential? steps) (apply comp (reverse steps)) steps)] ;allow for a list as well
+       (-> game (start-phase phase)
+                (steps)
+                (end-phase))))
 
 (def PhaseOptsSchema
   [:map {:closed true}
    [:phase {:optional true} :keyword]
-   [:steps {:optional true} [:=> [:cat :map] [:cat :map]]]])
+   [:steps {:optional true} [:or [:=> [:cat :map] :map]
+                                 [:sequential [:=> [:cat :map] :map]]]]])
 
 (def validate-opts (m/validator PhaseOptsSchema))
 (def explain-opts (m/explainer PhaseOptsSchema))

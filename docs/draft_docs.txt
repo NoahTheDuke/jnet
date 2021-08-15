@@ -4,7 +4,7 @@ Note that "changing the game state" does not include adding things to the queue 
 
 Effect Step: Basic indivisible units of game state change. Things like drawing cards, gaining credits or the steps of a timing structure fall into this.  
 Blocking Step: A step that causes the engine to stop what it's doing and wait for something. Usually it'll be waiting on a user because of a prompt. 
-Guard Step: A step that is aborted to by the abort step (which is an effect step). Any effect type can be used for this purpose. 
+Guard Step: A step that is aborted to by the abort step (which is an effect step). Any step type can be used for this purpose. 
 Composite Step: All other steps. These steps never do anything other than add steps (including effect steps) to the queue, potentially after examining the game state. simple-step gives composite steps.
 Composite Call: A composite step that can be used directly, in addition to queuing it. Composite calls should not depend on game state. Note that the distinction between a composition step and a composite call is in how the revelant function is defined not in how it is used. 
 
@@ -12,7 +12,7 @@ Prompt Step: A blocking step. Displays a custom prompt to the user.
 PAW Step: A blocking step. Represents a paid ability window. 
 Action Step: A blocking step. Represents the action phase ability window. 
 
-Interrupt Check Step: A composite step. Represents an interrupt window. 
+Interrupt Check Step: A composite step. Represents an interrupt window. Note it's composite even though it can block and change the game state, because it uses other prompts and effects to do that.
 
 Checkpoint Step: An effect step. Must be requested manually when required by the engine or cards. Acts as a blocking step for the purposes of the imminent instruction. 
 Imminent Instruction: The series of steps between the start of the pipeline and the next blocking step or checkpoint step. 
@@ -20,10 +20,10 @@ Expected Effects: The results of a process via which the interrupt system determ
 
 -----------
 
-pipeline Workings:
+Pipeline Workings:
 The pipeline runs with a simple (swap! @game handle-prompt-clicked player action). handle-prompt-clicked will give the action to the prompt at the beginning of the pipeline then call continue-game.
 
-On each invocation after than the first, the kernel expects to be given the action (e.g. prompt click) that caused the invocation. This action is passed to the prompt-clicked method of the first step in the queue prior to the main iteration being performed.
+On each invocation after the first, the kernel expects to be given the action (e.g. prompt click) that caused the invocation. This action is passed to the prompt-clicked method of the first step in the queue prior to the main iteration being performed.
 
 Each iteration of continue-game performs the following steps:
 Call update-pipeline.
@@ -41,80 +41,66 @@ Example:
 
 (defn example-composite-call [game some args whatever] (-> game (other-step some args) (more-step whatever)))
 
-If a function examines the game state or recurs, it's known as a composite step and must be defined as a proper step. Like with altering the game state examining the game state is something you must do directly to qualify. A function that draws cards until your hand is full would count because it looks at how many cards you have in hand (i.e. a value that could be altered if there are draw steps in the pipeline). As such this function should be defined as one that queues a step. The effect of the card game day would not count and can be implemented as a simple function, because it can just call that function.
+If a function examines the game state or recurs, it's known as a composite step and must be defined as a proper step. Like with altering the game state examining the game state is something you must do directly to qualify. A function that draws cards until your hand is full would count because it looks at how many cards you have in hand (i.e. a value that could be altered if there are draw steps in the pipeline). As such this function should be defined as one that queues a step (e.g. via defstep). The effect of the card Game Day would not count and can be implemented as a simple function, because it can just call that function. Likewise, the majority of cards can be implemented as simple functions. 
 
-Composite steps that wish to recur must be defined as a proper step and should use (queue-step this) to achieve this. A defn like macro is provided that makes any function a step or the as-step macro provides inline steps. For instance, this function can be safely defined with a simple defn:
+Composite steps that wish to recur must be defined as a proper step and should use (queue-step this) to achieve this. A defn like macro defstep is provided that makes any function a step or the as-step macro provides inline steps. For instance, this function can be safely defined with a simple defn:
 
-(defn simple-call [game] (-> game (blah) (blah) (blah) (as-step (step game (examine-state game))) (blah) (blah) (blah)))
-
+(defn simple-call [game] (-> game (blah) (blah) (blah) (as-step (some-effect game (examine-state game))) (blah) (blah) (blah)))
 
 Or showing recursion over a prompt:
 
-(-> game (blah) (blah)
-  (as-step (if (mu-limit-exceeded game)
-			   (-> game
-				   (trash-program-prompt)
-				   (queue-step this))
-			   game))
-  (blah) (blah) (blah))
+(defstep check-mu-usage [game]
+  (if (mu-limit-exceeded game)
+      (-> game
+          (trash-program-prompt)
+          (queue-step this))
+      game))
 
-
-As you can see if other-step and more-step were composite calls themselves with similar definitions they'd just immediately have their effect. This is safe because composite steps can only change the pipeline. They have no way to cause triggers or prompts. This means that composite steps are usually expanded before they ever hit the queue. Some composite steps must be true steps, mostly to allow the ablity to (queue-step this) and recur. This method of recursion is the main looping mechanism for the game. 
-
-The signature of the functions used is the same in either case, as with all steps. That same composite call as a true step is instead defined (probably via a macro) like so:
-
-(defn example-composite-step [game some args whatever] (-> game (queue-simple-step (other-step some args) (more-step whatever))))
-
-Either way the process for using them is the same as with all steps. Just thread game through the function. 
 
 Prompt Steps:
-Prompts can have any structure really, so long as the users click can be mapped to a step we're good. Prompt steps, like all steps, should define at least one function that you can thread game through and get them added to the queue. Prompts are thing most likely to want to define more functions for different cases. Most stuff should be able to use pretty simple versions though. 
+Prompts can have any structure really, so long as the users click can be mapped to a step we're good. Prompt steps, like all steps, should have at least one helper function that you can thread game through and get them added to the queue. Prompts are the thing most likely to want to define more functions for different cases. Most stuff should be able to use pretty simple versions though. 
 
 PAW Step:
 A prompt step that displays a pass button and activates relevant paid abilities/rezzing etc. 
 
 Action Step:
-Similar to the PAW step but displays the basic action card.
+Similar to the PAW step but displays the basic action card. 
 
 Interrupt Check Step:
 A composite step for interrupts. Interrupts are probably the most complicated part of the rules and consequently the engine.
-This step is not usually manually used by card or engine effects. Instead, as detailed below, it is used as part of resolving a step made with the def-effect-full macro.
+This step is not usually manually used by card or engine effects. Instead, as detailed below, it is used as part of resolving a step made with the defeffect macro.
 
 First, we calculate the expected effects of the imminent instruction. 
-This is done by setting the :expected key in game to an empty list and then calling continue-game. 
+This is done by setting the :expected-effects key in game to an empty list and then calling continue-game. 
 The presence of :expected causes checkpoints to become blocking and effect steps to append themselves to the :expected list when they run. 
 #I don't think there's an official ruling on if the effect steps should still be changing the state as well. It's utterly moot I think. It's no skin either way for us though.
-After extracting the :expected list from the returned game state the rest is discarded. 
+After extracting the :expected-effects list from the returned game state the rest is discarded. 
 
 The :expected list is checked against each active interrupt ability for relevance. If none are found, the check is over, disable interrupts (they will be enabled again at the next checkpoint). 
-If some are found, do a stanrd set of prompts/PAW to resolve them, disable interrupts and continue.
+If some are found, do a standard set of trigger prompts/PAW steps to resolve them, disable interrupts and continue.
 
-def-effect-full macro:
+defeffect-full macro:
 This macro is used to declare effect steps with all the bells and whistles. It has the same syntax as defn. If the first argument is not "game" it errors. 
 
-Using defstep will define a new step record/schema with a name created from the function name. So draw will produce DrawStep. 
+An entry will be created in the triggers, interrupts and prevention lists based on the function name. So draw will produce :runner-draw, :corp-draw and :draw in all lists. Modifiers can change these names or suppress some of this behaviour. 
 
-This record will have extra properties with names that correspond to the arguments of the function, excepting game of course. 
+A new function will be defined with the function name and arguments as given. This function simply creates a new instance of EffectStep with appropriate properties, including trigger names and the arguments to the function call, and queues it. 
 
-An entry will be created in the triggers and interrupts lists based on the function name. So draw will produce :runner-draw and :corp-draw in both lists. Modifiers can change these names or suppress some or all of this behaviour. The names are stored in properties of the record. 
+When the continue-step of this new step is called it will first check if there's an applicable prevention effect, and simply return if so.
+Then it will check if interrupts are disabled. If they are not it will queue an interrupt check step, then queue itself then return. 
 
-A new function will be defined with the function name and arguments as given. This function will check for relevant prevention effects, if none are found create a new instance of the step, setting the extra properties appropriately to its arguments and queue it. 
+If interrupts are disabled, execute the function body, passing in the arguments that were stored in EffectStep when it was created.
 
-When the continue-step of this new step is called it will first check if interrupts are disabled.
-If they are not it will queue an interrupt check step, then itself then return. 
+Then do a trigger check, adding relevant triggers to the trigger queue (not to be confused with the main queue). 
 
-After the interrupt check, execute the function body, passing in the arguments from the properties.
+defeffect-triggers: same as def-effect-full but disables stuff other than triggers, useful for start of turn or similar.
 
-Then do a trigger check in line with the interrupt check, but you just add relevant triggers to the trigger queue (not to be confused with the main queue). 
-
-def-effect-triggers: same as def-effect-full but disables stuff other than triggers, useful for start of turn or similar.
-
-def-effect-light: disables all the fancy stuff, useful for random timing structure steps or not really game actions like writing to the log
+defeffect: disables all the fancy stuff, useful for random timing structure steps or not really game actions that we still want to treat as one like writing to the log.
 
 -----------
 
-let-step macro: This macro gives you access to the results of a step. A step can use (set-result game result) to give a result, which can then be bound to a symbol with the let-step macro.
-Internally this works via set-result just putting the value in :return-value in game. The let-step macro will first handle its bindings. For each one it queues a step that just calls (set-result nil), then queues the given binding, then queues something that takes the :return-value from game and puts it in an atom. Then it will wrap its body in something that derefs the atoms and binds them to the right symbols.  
+let-step macro: This macro gives you access to the results of a step. A step can use set-result to give a result, which can then be bound to a symbol with the let-step macro.
+Internally this works via set-result just putting the value in :step-result in game. The let-step macro will first recursively deconstruct itself into let-steps with a single binding each. Then it queues a step that just calls (set-result nil), then queues the given bindings value, then queues something that takes the :step-result from game and puts it in an atom. Then it will wrap its body in something that derefs the atom and binds the right symbol.  
 
 -----------
 

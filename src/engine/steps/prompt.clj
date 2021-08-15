@@ -58,7 +58,7 @@
     (-> game
         (set-active-prompt active-player this)
         (set-waiting-prompt waiting-player this))))
-        
+
 ;Moved down in the file as for some reason it can't see functions defined below it.
 (defrecord PromptStep
   [on-prompt-clicked type uuid]
@@ -74,7 +74,7 @@
         (throw (ex-info (str "Prompt step isn't valid: " (pr-str (me/humanize explained-error)))
                         (select-keys explained-error [:errors])))))))
 
-(defn base-prompt
+(defn base-prompt-step
   [{:keys [active-condition active-prompt waiting-text
            on-prompt-clicked]}]
   (->> {:active-condition
@@ -88,6 +88,10 @@
         :uuid (java.util.UUID/randomUUID)}
        (map->PromptStep)
        (step/validate)))
+
+(defn base-prompt
+  [game & args]
+    (pipeline/queue-step game (apply base-prompt-step args)))
 
 (defn handler-active-prompt
   [active-text buttons]
@@ -115,13 +119,17 @@
 (def validate-handler-props (m/validator HandlerPromptPropsSchema))
 (def explain-handler-props (m/explainer HandlerPromptPropsSchema))
 
-(defn handler-prompt
+(defn handler-prompt-step
   [props]
   (assert (validate-handler-props props) (me/humanize (explain-handler-props props)))
   (let [{:keys [active-condition active-text waiting-text choices]} props
         buttons (mapv (fn [k] {:text k :arg k}) (keys choices))]
-    (base-prompt
+    (base-prompt-step
       {:active-condition active-condition
        :waiting-text waiting-text
        :active-prompt (handler-active-prompt active-text buttons)
        :on-prompt-clicked (handler-on-prompt-clicked choices)})))
+
+(defn handler-prompt
+  [game & args]
+  (pipeline/queue-step game (apply handler-prompt-step args)))

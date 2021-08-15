@@ -17,8 +17,7 @@
     (update-in game [player :credits] inc)))
 
 (defn action-phase [game player]
-  (queue-step game 
-    (prompt/base-prompt
-      {:active-condition player
-       :active-prompt action-active-prompt
-       :on-prompt-clicked action-prompt-clicked})))
+  (prompt/base-prompt game
+    {:active-condition player
+     :active-prompt action-active-prompt
+     :on-prompt-clicked action-prompt-clicked}))

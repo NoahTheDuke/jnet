@@ -19,9 +19,7 @@ step/Step
 (continue-step [this game] game)
 (validate [this] true))
 
-
-
-(defn block-step
+(defn block
   [game]
   (pipeline/queue-step game (BlockStep. (java.util.UUID/randomUUID))))
 

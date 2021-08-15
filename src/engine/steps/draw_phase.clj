@@ -5,7 +5,7 @@
    [engine.steps.phase :as phase]
    [engine.macros :refer [defstep]]))
 
-(defstep mandatory-draw [game]
+(defn mandatory-draw [game]
   (-> game
       (msg/add-message "{0} draws 1 card for their mandatory draw." [(:corp game)])
       (draw/draw :corp 1)))

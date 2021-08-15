@@ -32,7 +32,7 @@
           (draw/draw-unsafe player 5))))))
 
 (defn mulligan-prompt [game player]
-  (queue-step game (prompt/base-prompt
+  (prompt/base-prompt game
     {:active-condition player
      :active-prompt mulligan-active-prompt
-     :on-prompt-clicked mulligan-prompt-clicked})))
+     :on-prompt-clicked mulligan-prompt-clicked}))

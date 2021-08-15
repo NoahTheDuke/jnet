@@ -22,14 +22,14 @@
                   :active-prompt active-prompt
                   :waiting-text waiting-text
                   :on-prompt-clicked (fn [_step game _player _button] game)}
-                 (sut/base-prompt)
+                 (sut/base-prompt-step)
                  (select-keys [:active-condition :active-prompt
                                :waiting-prompt :type])))))
     (testing "waiting-prompt has a default"
       (is (= (-> {:active-condition :corp
                   :active-prompt (constantly {:title "yes"})
                   :on-prompt-clicked (fn [_step game _player _button] game)}
-                 (sut/base-prompt)
+                 (sut/base-prompt-step)
                  (:waiting-prompt))
              {:text "Waiting for opponent"})))))
 
@@ -38,7 +38,7 @@
                          :text "Example text"}
           waiting-text "Waiting text"
           waiting-prompt {:text waiting-text}
-          step (sut/base-prompt
+          step (sut/base-prompt-step
                  {:active-condition :corp
                   :active-prompt (constantly active-prompt)
                   :waiting-text waiting-text
@@ -58,7 +58,7 @@
     (let [active-prompt {:header "Example header"
                          :text "Example text"}
           waiting-text "Waiting text"
-          step (sut/base-prompt
+          step (sut/base-prompt-step
                  {:active-condition :corp
                   :active-prompt (constantly active-prompt)
                   :waiting-text waiting-text
@@ -74,7 +74,7 @@
   (testing "continue calls into set-prompt"
     (let [active-prompt {:header "Example header"
                          :text "Example text"}
-          step (sut/base-prompt
+          step (sut/base-prompt-step
                  {:active-condition :corp
                   :active-prompt (constantly active-prompt)
                   :on-prompt-clicked (fn [_step game _player _button] game)})
@@ -90,7 +90,7 @@
   (testing "player prompts are restored after step is complete"
     (let [active-prompt {:header "Example header"
                          :text "Example text"}
-          step (sut/base-prompt
+          step (sut/base-prompt-step
                  {:active-condition :corp
                   :active-prompt (constantly active-prompt)
                   :on-prompt-clicked (fn [_step game _player _button] game)})
@@ -103,7 +103,7 @@
       (is (= "" (get-in runner [:prompt-state :text]))))))
 
 (deftest prompt-with-handlers-test
-  (let [step (sut/handler-prompt
+  (let [step (sut/handler-prompt-step
                {:active-condition :corp
                 :active-text "How many to draw?"
                 :waiting-text "Corp to draw"

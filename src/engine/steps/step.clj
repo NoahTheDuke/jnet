@@ -82,4 +82,3 @@
 (defn simple-step
   [continue-step]
   (make-base-step {:continue-step (simple-step-wrapper continue-step)}))
-
