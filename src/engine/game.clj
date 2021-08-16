@@ -47,7 +47,7 @@
   [:map
    [:user [:map [:username string?]]]
    [:identity card/PrintedCard]
-   [:deck-list [:* card/PrintedCard]]])
+   [:deck-list deck/DeckListSchema]])
 
 (def NewGameOptsSchema
   [:map

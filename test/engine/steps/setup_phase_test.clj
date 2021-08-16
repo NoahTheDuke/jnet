@@ -4,38 +4,53 @@
    [engine.game :as game]
    [engine.pipeline :as pipeline]
    [engine.steps.setup-phase :as sut]
-   [engine.test-utils :refer [click-prompt]]))
+   [engine.test-utils :refer :all]))
 
 (deftest setup-test
-  (is (= :phase/setup
-         (-> (game/make-game nil)
-             (pipeline/queue-step (sut/setup-phase))
-             (pipeline/continue-game)
-             (:current-phase))))
-  (testing "both players shuffle their decks"
-    (with-redefs [clojure.core/shuffle (comp vec reverse)]
-      (is (= [:d :c :b :a]
-             (-> (game/make-game {:corp {:deck-list [:a :b :c :d :e :f :g :h :i]}})
+  (let [deck-list (map #(do {:name (str %)}) "abcdefghij")]
+    (is (= :phase/setup
+           (-> (game/make-game nil)
+               (pipeline/queue-step (sut/setup-phase))
+               (pipeline/continue-game)
+               (:current-phase))))
+    (testing "both players shuffle their decks"
+      (with-redefs [clojure.core/shuffle (comp vec reverse)]
+        (is (= [{:name "e"
+                 :location 5
+                 :zone :zone/deck}
+                {:name "d"
+                 :location 6
+                 :zone :zone/deck}
+                {:name "c"
+                 :location 7
+                 :zone :zone/deck}
+                {:name "b"
+                 :location 8
+                 :zone :zone/deck}
+                {:name "a"
+                 :location 9
+                 :zone :zone/deck}]
+               (-> (game/make-game {:corp {:deck-list deck-list}})
+                   (pipeline/queue-step (sut/setup-phase))
+                   (pipeline/continue-game)
+                   (get-in [:corp :deck]))))))
+    (testing "both players draw 5 cards"
+      (is (= 5
+             (-> (game/make-game {:corp {:deck-list deck-list}})
                  (pipeline/queue-step (sut/setup-phase))
                  (pipeline/continue-game)
-                 (get-in [:corp :deck]))))))
-  (testing "both players draw 5 cards"
-    (is (= 5
-           (-> (game/make-game {:corp {:deck-list [:a :b :c :d :e :f :g :h :i]}})
-               (pipeline/queue-step (sut/setup-phase))
-               (pipeline/continue-game)
-               (get-in [:corp :hand])
-               (count))))
-    (is (= 5
-           (-> (game/make-game {:runner {:deck-list [:a :b :c :d :e :f :g :h :i]}})
-               (pipeline/queue-step (sut/setup-phase))
-               (pipeline/continue-game)
-               (get-in [:runner :hand])
-               (count))))))
+                 (get-in [:corp :hand])
+                 (count))))
+      (is (= 5
+             (-> (game/make-game {:runner {:deck-list deck-list}})
+                 (pipeline/queue-step (sut/setup-phase))
+                 (pipeline/continue-game)
+                 (get-in [:runner :hand])
+                 (count)))))))
 
 (deftest mulligan-tests
   (testing "mulligan prompts display correctly"
-    (let [game (-> (game/make-game {:corp {:deck-list [:a :b :c :d :e :f :g :h :i]}})
+    (let [game (-> (game/make-game {:corp {:deck-list (a-deck :corp)}})
                    (pipeline/queue-step (sut/setup-phase))
                    (pipeline/continue-game))]
       (is (= {:header "Mulligan"

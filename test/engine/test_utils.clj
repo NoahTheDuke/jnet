@@ -88,3 +88,8 @@
      (game/start-new-game
        {:corp (merge corp {:user {:username "Corp player"}})
         :runner (merge runner {:user {:username "Runner player"}})}))))
+
+(defn a-deck [side]
+  (case side
+    :corp (mapv data/make-card (repeat 10 "hedge-fund"))
+    :runner (mapv data/make-card (repeat 10 "sure-gamble"))))

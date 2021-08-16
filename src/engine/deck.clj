@@ -1,13 +1,20 @@
-(ns engine.deck 
+(ns engine.deck
   (:require
-    [engine.card :as card]
-    [malli.core :as m]))
-
-(defn prepare-deck
-  [player deck])
+   [engine.card :as card]))
 
 (def DeckListSchema
   [:* card/PrintedCard])
 
-(def validate-deck-list (m/validator DeckListSchema))
-(def explain-deck-list (m/explainer DeckListSchema))
+(defn prepare-deck
+  [deck]
+  (map-indexed
+    (fn [idx card]
+      (assoc card :location idx :zone :zone/deck))
+    deck))
+
+(defn shuffle-deck
+  [deck]
+  (->> (shuffle deck)
+       (map-indexed
+         (fn [idx card]
+           (assoc card :location idx)))))

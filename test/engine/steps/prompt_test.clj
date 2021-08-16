@@ -6,7 +6,7 @@
    [engine.pipeline :as pipeline]
    [engine.prompt-state :as prompt-state]
    [engine.steps.prompt :as sut]
-   [engine.test-utils :refer [click-prompt]]))
+   [engine.test-utils :refer :all]))
 
 (deftest make-prompt-test
   (let [active-condition (constantly true)
@@ -115,7 +115,7 @@
                (pipeline/continue-game)
                (prompt-state/prompt-text :runner))))
     (is (= 2
-           (-> (game/make-game {:corp {:deck-list [:a :b :c]}})
+           (-> (game/make-game {:corp {:deck-list (a-deck :corp)}})
                (pipeline/queue-step step)
                (pipeline/continue-game)
                (click-prompt :corp "Draw 2")

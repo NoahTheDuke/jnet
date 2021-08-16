@@ -68,6 +68,7 @@
        (reset! card-data)))
 
 (defn make-cards-in-deck
+  "Called by the server on the client's deck before passing to engine."
   [{:keys [identity cards]}]
   (let [deck (->> cards
                   (mapcat #(repeat (:qty %) (:name %)))

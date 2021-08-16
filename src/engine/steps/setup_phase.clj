@@ -3,7 +3,8 @@
    [engine.draw :as draw]
    [engine.steps.step :refer [simple-step]]
    [engine.steps.mulligan-step :as mulligan]
-   [engine.steps.phase :as phase]))
+   [engine.steps.phase :as phase]
+   [engine.deck :as deck]))
 
 (defn setup-begin []
   (simple-step
@@ -16,8 +17,8 @@
   (simple-step
     (fn [game]
       (-> game
-          (update-in [:corp :deck] shuffle)
-          (update-in [:runner :deck] shuffle)
+          (update-in [:corp :deck] deck/shuffle-deck)
+          (update-in [:runner :deck] deck/shuffle-deck)
           (draw/draw :corp 5)
           (draw/draw :runner 5)))))
 
