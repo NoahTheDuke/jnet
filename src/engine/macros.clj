@@ -28,7 +28,7 @@
             bind-val (second bindings)]
         `(let [~'__result-atom__ (atom nil)
                ~'game (set-result ~game nil) ;Make sure we get nil if the step doesn't set anything.
-               ~'game ~bind-val
+               ~'game (as-step ~'game ~bind-val) ;The as-step isn't strictly necessary but allows safely examining state from bind values
                ~'game (as-step ~'game (reset! ~'__result-atom__ (get-in ~'game [:step-result])) ~'game)]
            (as-step ~'game (let [~bind-var (deref ~'__result-atom__)]
                       ~@body))))))
