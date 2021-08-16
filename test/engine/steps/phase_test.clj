@@ -38,19 +38,19 @@
     (testing "steps are queued"
       (is (= 4 (-> (game/make-game nil)
                    (pipeline/queue-step (sut/make-phase
-                                      {:steps [step1 step2 step3]}))
+                                          {:steps [step1 step2 step3]}))
                    (pipeline/continue-game)
                    (get-in [:gp :pipeline])
                    (count)))))
     (is (= :phase/start-of-turn
            (-> (game/make-game nil)
                (pipeline/queue-step (sut/make-phase
-                                  {:phase :phase/start-of-turn
-                                   :steps [step1]}))
+                                      {:phase :phase/start-of-turn
+                                       :steps [step1]}))
                (pipeline/continue-game)
                (:current-phase))))
     (is (nil? (-> (game/make-game nil)
                   (pipeline/queue-step (sut/make-phase
-                                     {:phase :phase/start-of-turn}))
+                                         {:phase :phase/start-of-turn}))
                   (pipeline/continue-game)
                   (:current-phase))))))

@@ -67,7 +67,7 @@
        (into {})
        (reset! card-data)))
 
-(defn prepare-deck
+(defn make-cards-in-deck
   [{:keys [identity cards]}]
   (let [deck (->> cards
                   (mapcat #(repeat (:qty %) (:name %)))

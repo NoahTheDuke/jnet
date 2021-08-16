@@ -6,7 +6,7 @@
 (deftest new-player-test
   (let [user {:username "Noah"}
         opts {:user user
-              :deck {:identity "custom-biotics-engineered-for-success"
-                     :cards [{:name "hedge-fund"
-                              :qty 2}]}}]
+              :deck-list {:identity "custom-biotics-engineered-for-success"
+                          :cards [{:name "hedge-fund"
+                                   :qty 2}]}}]
     (is (= (:username user) (:name (sut/new-player opts))))))

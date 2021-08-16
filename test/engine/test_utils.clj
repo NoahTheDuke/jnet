@@ -32,6 +32,7 @@
        (:messages)
        (mapv #(dissoc % :date))))
 
+#_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (defn print-messages
   [game]
   (println (get-messages game))
@@ -65,13 +66,13 @@
 
 (defn make-decks
   [{:keys [corp runner]}]
-  {:corp (data/prepare-deck
-           {:cards (transform (or (:deck corp)
+  {:corp (data/make-cards-in-deck
+           {:cards (transform (or (:deck-list corp)
                                   (repeat 10 "hedge-fund")))
             :identity (or (:id corp)
                           "the-syndicate-profit-over-principle")})
-   :runner (data/prepare-deck
-             {:cards (transform (or (:deck runner)
+   :runner (data/make-cards-in-deck
+             {:cards (transform (or (:deck-list runner)
                                     (repeat 10 "sure-gamble")))
               :identity (or (:id runner)
                             "the-catalyst-convention-breaker")})})

@@ -11,8 +11,7 @@
     (is (:turns (sut/make-game {})))))
 
 (deftest corp-turn-test
-  (is (= 6 (-> (sut/start-new-game {:corp {:user {:username "Corp player"}
-                                           :deck [:a :b :c :d :e :f :g :h :i :j]}})
+  (is (= 6 (-> (new-game)
                (click-prompt :corp "Keep")
                (click-prompt :runner "Keep")
                (get-in [:corp :hand])
@@ -27,5 +26,5 @@
              (click-prompt :corp "[click]: Gain 1[c].")
              (click-prompt :corp "[click]: Gain 1[c].")
              (click-prompt :corp "Card 1")
-             (prompt-fmt :corp)
+             ; (prompt-fmt :corp)
              (:active-player)))))

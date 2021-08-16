@@ -1,15 +1,17 @@
 (ns engine.player
   (:require
-    [engine.prompt-state :as prompt-state]))
+   [engine.prompt-state :as prompt-state]))
 
 (defn new-player
-  [{:keys [user identity deck-list]}]
+  [{user :user
+    id :identity
+    deck-list :deck-list}]
   {:deck-list (or deck-list [])
    :deck (or deck-list [])
    :discard []
    :hand []
    :hand-size 5
-   :identity identity
+   :identity id
    :play-area []
    :rfg []
    :scored []

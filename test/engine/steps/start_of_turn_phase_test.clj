@@ -5,12 +5,11 @@
    [engine.pipeline :as pipeline]
    [engine.player :as player]
    [engine.steps.start-of-turn-phase :as sut]
-   [engine.test-utils :refer [click-prompt]]))
+   [engine.test-utils :refer :all]))
 
 (deftest active-player-test
   (is (= :corp
-         (-> (game/start-new-game {:corp {:deck [:a :b :c :d :e :f :g :h :i]}
-                                   :runner {:deck [:a :b :c :d :e :f :g :h :i]}})
+         (-> (new-game)
              (click-prompt :corp "Keep")
              (click-prompt :runner "Keep")
              (:active-player)))))

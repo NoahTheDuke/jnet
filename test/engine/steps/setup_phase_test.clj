@@ -15,19 +15,19 @@
   (testing "both players shuffle their decks"
     (with-redefs [clojure.core/shuffle (comp vec reverse)]
       (is (= [:d :c :b :a]
-             (-> (game/make-game {:corp {:deck [:a :b :c :d :e :f :g :h :i]}})
+             (-> (game/make-game {:corp {:deck-list [:a :b :c :d :e :f :g :h :i]}})
                  (pipeline/queue-step (sut/setup-phase))
                  (pipeline/continue-game)
                  (get-in [:corp :deck]))))))
   (testing "both players draw 5 cards"
     (is (= 5
-           (-> (game/make-game {:corp {:deck [:a :b :c :d :e :f :g :h :i]}})
+           (-> (game/make-game {:corp {:deck-list [:a :b :c :d :e :f :g :h :i]}})
                (pipeline/queue-step (sut/setup-phase))
                (pipeline/continue-game)
                (get-in [:corp :hand])
                (count))))
     (is (= 5
-           (-> (game/make-game {:runner {:deck [:a :b :c :d :e :f :g :h :i]}})
+           (-> (game/make-game {:runner {:deck-list [:a :b :c :d :e :f :g :h :i]}})
                (pipeline/queue-step (sut/setup-phase))
                (pipeline/continue-game)
                (get-in [:runner :hand])
@@ -35,7 +35,7 @@
 
 (deftest mulligan-tests
   (testing "mulligan prompts display correctly"
-    (let [game (-> (game/make-game {:corp {:deck [:a :b :c :d :e :f :g :h :i]}})
+    (let [game (-> (game/make-game {:corp {:deck-list [:a :b :c :d :e :f :g :h :i]}})
                    (pipeline/queue-step (sut/setup-phase))
                    (pipeline/continue-game))]
       (is (= {:header "Mulligan"

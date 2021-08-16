@@ -19,7 +19,10 @@
    [:trash-cost {:optional true} int?]
    [:type keyword?]
    [:uniqueness boolean?]])
+(def validate-printed-card (m/validator PrintedCard))
+(def explain-printed-card (m/explainer PrintedCard))
 
 (defn map->Card [card]
-  (assert (m/validate PrintedCard card) (:errors (m/explain PrintedCard card)))
+  (assert (validate-printed-card card)
+          (:errors (explain-printed-card card)))
   card)
