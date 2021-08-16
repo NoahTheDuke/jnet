@@ -11,7 +11,6 @@
   (is (= :corp
          (-> (game/start-new-game {:corp {:deck [:a :b :c :d :e :f :g :h :i]}
                                    :runner {:deck [:a :b :c :d :e :f :g :h :i]}})
-             (second)
              (click-prompt :corp "Keep")
              (click-prompt :runner "Keep")
              (:active-player)))))
@@ -19,14 +18,12 @@
 (deftest gain-allotted-clicks-test
   (is (= (:clicks-per-turn (player/new-corp nil))
          (-> (game/new-game nil)
-             (pipeline/queue-step (sut/gain-allotted-clicks))
+             (sut/gain-allotted-clicks)
              (pipeline/continue-game)
-             (second)
              (get-in [:corp :clicks]))))
   (is (= (:clicks-per-turn (player/new-runner nil))
          (-> (game/new-game nil)
              (assoc :active-player :runner)
-             (pipeline/queue-step (sut/gain-allotted-clicks))
+             (sut/gain-allotted-clicks)
              (pipeline/continue-game)
-             (second)
              (get-in [:runner :clicks])))))

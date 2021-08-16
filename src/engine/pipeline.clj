@@ -12,10 +12,6 @@
   [game]
   (get-in game [:gp :pipeline 0]))
 
-(defn complete-current-step
-  [game]
-  (assoc-in game [:gp :pipeline 0 :complete?] true))
-
 (defn drop-current-step
   [game]
   (specter/setval [:gp :pipeline specter/FIRST] specter/NONE game))
@@ -31,14 +27,20 @@
   [game]
   (let [game (update-pipeline game)]
     (if-let [step (get-current-step game)]
-      (let [[result new-game] (step/continue-step step game)]
-        (if result
-          (recur (drop-current-step new-game))
-          [false new-game]))
-      [true game])))
+      (if-let [prompt-game (step/blocking step game)]
+        prompt-game
+        (let [new-game (try (step/continue-step step game)
+                            (catch Exception e
+                                   (clojure.pprint/pprint game) ;Todo setup exinfo
+                                   (throw e)))]
+          (recur (drop-current-step new-game))))
+      game)));This should probably be an error, empty pipeline shouldn't happen
 
 (defn handle-prompt-clicked
   [game player button]
   (if-let [step (get-current-step game)]
-    (step/on-prompt-clicked step game player button)
-    [false game]))
+    (let [step (step/on-prompt-clicked step game player button)]
+      (-> game (drop-current-step)
+               (queue-step step)
+               (continue-game)))
+    game))

@@ -1,6 +1,7 @@
 (ns engine.messages
   (:require
-    [clojure.string :as str]))
+    [clojure.string :as str]
+    [engine.macros :refer [as-step]]))
 
 (defn strip-for-message
   [obj]
@@ -27,5 +28,5 @@
 (defn add-message
   ([game message] (add-message game message nil))
   ([game message args]
-   (update game :messages conj {:date (java.util.Date.)
-                                :text (format-message message args)})))
+   (as-step game (update game :messages conj {:date (java.util.Date.)
+                                              :text (format-message message args)}))))

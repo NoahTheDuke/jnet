@@ -79,60 +79,63 @@
            (:gp (sut/update-pipeline game))))))
 
 (deftest continue-gp-test
-  (testing "returns true by default"
+  (testing "does nothing by default"
     (let [game (game/new-game nil)]
-      (is (= [true game] (sut/continue-game game)))))
+      (is (= game (sut/continue-game game)))))
   (testing "updates the pipeline"
     (let [step (step/make-base-step
                  {:continue-step
-                  (fn [_step game] [false game])})
+                  (fn [_step game] game)})
           game (-> (game/new-game nil)
                    (sut/queue-step step))]
       (is (= {:pipeline [step] :queue []}
-             (:gp (second (sut/continue-game game)))))))
+             (:gp (sut/update-pipeline game))))))
   (testing "calls 'continue-step' on current step"
     (let [step (step/make-base-step
                  {:continue-step
-                  (fn [_step _game] [false :foo])})
+                  (fn [_step game] (assoc-in game [:--test-flag] :--test-value))})
           game (-> (game/new-game nil)
                    (sut/queue-step step))]
-      (is (= [false :foo] (sut/continue-game game)))))
-  (testing "drops the current step if 'continue-step' returns true"
+      (is (= :--test-value (get-in (sut/continue-game game) [:--test-flag])))))
+  (testing "drops the current step after 'continue-step'"
     (let [step (step/make-base-step
                  {:continue-step
-                  (fn [_step game] [true game])})
+                  (fn [_step game] game)})
           game (-> (game/new-game nil)
                    (sut/queue-step step)
                    (sut/continue-game))]
-      (is (= {:pipeline [] :queue []} (:gp (second game)))))))
+      (is (= {:pipeline [] :queue []} (:gp game))))))
 
 (deftest handle-prompt-clicked-test
-  (testing "returns false by default"
+  (testing "does nothing by default"
     (let [game (game/new-game nil)]
-      (is (= [false game] (sut/handle-prompt-clicked game :corp "button")))))
+      (is (= game (sut/handle-prompt-clicked game :corp "button")))))
   (testing "doesn't update the pipeline"
-    (let [step (prompt/base-prompt
+    (let [step (prompt/base-prompt-step
                  {:active-prompt (constantly {:text "text"})
-                  :active-condition :corp})
+                  :active-condition :corp
+                  :on-prompt-clicked
+                  (fn [_step game _player _button] game)})
           game (-> (game/new-game nil)
                    (sut/queue-step step))]
       (is (= {:pipeline [] :queue [step]}
              (->> (sut/handle-prompt-clicked game :corp "button")
-                  (second)
                   (:gp))))))
-  (testing "returns false if pipeline is empty"
-    (let [step (prompt/base-prompt
-                 {:active-prompt (constantly {:text "text"})
-                  :active-condition :corp})
-          game (-> (game/new-game nil)
-                   (sut/queue-step step))]
-      (is (false? (first (sut/handle-prompt-clicked game :corp "button"))))))
-  (testing "calls 'on-prompt-clicked' on current step"
-    (let [step (prompt/base-prompt
+  (testing "does nothing if pipeline is empty"
+    (let [step (prompt/base-prompt-step
                  {:active-prompt (constantly {:text "text"})
                   :active-condition :corp
                   :on-prompt-clicked
-                  (fn [_step _game _player _button] [:foo :bar])})
+                  (fn [_step game _player _button] game)})
+          game (-> (game/new-game nil)
+                   (sut/queue-step step))]
+      (is (= game (sut/handle-prompt-clicked game :corp "button")))))
+  (testing "calls 'on-prompt-clicked' on current step"
+    (let [step (prompt/base-prompt-step
+                 {:active-prompt (constantly {:text "text"})
+                  :active-condition :corp
+                  :on-prompt-clicked
+                  (fn [_step game _player _button] (assoc-in game [:--test-flag] :--test-check ))})
           game (-> (game/new-game nil)
                    (assoc-in [:gp :pipeline] [step]))]
-      (is (= [:foo :bar] (sut/handle-prompt-clicked game :corp "button"))))))
+      (is (= :--test-check (get-in (sut/handle-prompt-clicked game :corp "button") [:--test-flag]))))))

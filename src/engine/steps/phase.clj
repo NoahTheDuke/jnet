@@ -2,39 +2,31 @@
   (:require
    [engine.pipeline :as pipeline]
    [engine.steps.step :refer [simple-step]]
+   [engine.macros :refer [defstep as-step]]
    [malli.core :as m]))
 
-(defn start-phase
-  [phase]
-  (simple-step
-    (fn [game]
-      (-> game
-          (assoc :current-phase (keyword "phase" (name phase)))))))
+(defstep start-phase
+  [game phase]
+    (-> game
+        (assoc :current-phase (keyword "phase" (name phase)))))
 
-(defn end-phase []
-  (simple-step
-    (fn [game]
-      (-> game
-          (assoc :current-phase nil)))))
-
-(defn initialize-steps
-  [{:keys [phase steps]
-    :or {phase :base}}]
-  (let [start-step (start-phase phase)
-        end-step (end-phase)]
-    (-> [start-step]
-        (into steps)
-        (into [end-step]))))
+(defstep end-phase [game]
+  (-> game
+      (assoc :current-phase nil)))
 
 (defn queue-phase-steps
-  [game steps]
-  (reduce pipeline/queue-step game steps))
+  [game {:keys [phase steps]
+         :or {phase :base steps identity}}]
+  (let [steps (if (sequential? steps) (apply comp (reverse steps)) steps)] ;allow for a list as well
+       (-> game (start-phase phase)
+                (steps)
+                (end-phase))))
 
 (def PhaseOptsSchema
   [:map {:closed true}
-   [:condition {:optional true} [:=> [:cat :map] :boolean]]
    [:phase {:optional true} :keyword]
-   [:steps {:optional true} [:* :any]]])
+   [:steps {:optional true} [:or [:=> [:cat :map] :map]
+                                 [:sequential [:=> [:cat :map] :map]]]]])
 
 (def validate-opts (m/validator PhaseOptsSchema))
 (def explain-opts (m/explainer PhaseOptsSchema))
@@ -47,8 +39,8 @@
    (assert (validate-opts opts) (:errors (explain-opts opts)))
    (-> (simple-step
          (fn [game]
-           (if (or (not (fn? condition))
-                   (condition game))
-             (queue-phase-steps game (initialize-steps opts))
-             game)))
+           (queue-phase-steps game opts)))
        (assoc :type :step/phase))))
+
+(defn phase [game & args]
+  (pipeline/queue-step game (apply make-phase args)))

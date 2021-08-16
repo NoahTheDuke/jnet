@@ -9,40 +9,35 @@
 (deftest setup-test
   (is (= :phase/setup
          (-> (game/new-game nil)
-             (pipeline/queue-step (sut/setup-phase))
+             (sut/setup-phase)
              (pipeline/continue-game)
-             (second)
              (:current-phase))))
   (testing "both players shuffle their decks"
     (with-redefs [clojure.core/shuffle (comp #(into [] %) reverse)]
       (is (= [:d :c :b :a]
              (-> (game/new-game {:corp {:deck [:a :b :c :d :e :f :g :h :i]}})
-                 (pipeline/queue-step (sut/setup-phase))
+                 (sut/setup-phase)
                  (pipeline/continue-game)
-                 (second)
                  (get-in [:corp :deck]))))))
   (testing "both players draw 5 cards"
     (is (= 5
            (-> (game/new-game {:corp {:deck [:a :b :c :d :e :f :g :h :i]}})
-               (pipeline/queue-step (sut/setup-phase))
+               (sut/setup-phase)
                (pipeline/continue-game)
-               (second)
                (get-in [:corp :hand])
                (count))))
     (is (= 5
            (-> (game/new-game {:runner {:deck [:a :b :c :d :e :f :g :h :i]}})
-               (pipeline/queue-step (sut/setup-phase))
+               (sut/setup-phase)
                (pipeline/continue-game)
-               (second)
                (get-in [:runner :hand])
                (count))))))
 
 (deftest mulligan-tests
   (testing "mulligan prompts display correctly"
     (let [game (-> (game/new-game {:corp {:deck [:a :b :c :d :e :f :g :h :i]}})
-                   (pipeline/queue-step (sut/setup-phase))
-                   (pipeline/continue-game)
-                   (second))]
+                   (sut/setup-phase)
+                   (pipeline/continue-game))]
       (is (= {:header "Mulligan"
               :text "Keep or mulligan this hand?"
               :buttons [{:text "Keep"
