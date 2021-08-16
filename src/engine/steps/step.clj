@@ -31,14 +31,12 @@
   (continue-step [this _game] (-continue-step this))
   (complete? [this] (-complete? this))
   (validate [this] (-validate this))
-  (on-card-clicked [this _game _player _arg]
-    (-on-prompt-clicked this))
+  (on-card-clicked [this _game _player _arg] (-on-prompt-clicked this))
   nil
   (continue-step [this _game] (-continue-step this))
   (complete? [this] (-complete? this))
   (validate [this] (-validate this))
-  (on-card-clicked [this _game _player _arg]
-    (-on-prompt-clicked this)))
+  (on-card-clicked [this _game _player _arg] (-on-prompt-clicked this)))
 
 (def BaseStepSchema
   [:map {:closed true}
@@ -55,13 +53,11 @@
   Step
   (continue-step [this state] (continue-step this state))
   (complete? [_])
-  (on-prompt-clicked [_this game _player _arg] [false game])
+  (on-prompt-clicked [_this game _player _arg] game)
   (validate [this]
-    (if (validate-base-step this)
-      this
-      (let [explained-error (explain-base-step (into {} this))]
-        (throw (ex-info (str "Base step isn't valid: " (pr-str (me/humanize explained-error)))
-                        (select-keys explained-error [:errors])))))))
+    (assert (validate-base-step this)
+            (me/humanize (explain-base-step this)))
+    this))
 
 (defn default-continue-step [_step game] [true game])
 

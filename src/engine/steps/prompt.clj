@@ -17,8 +17,7 @@
       [:or [:enum :corp :runner] [:=> [:cat :map :map :keyword] :boolean]]]
      [:active-prompt [:=> [:cat :map :map :keyword] :map]]
      [:waiting-prompt [:map [:text :string]]]
-     [:on-prompt-clicked [:=> [:cat :map :map [:enum :corp :runner] :string]
-                          [:cat :boolean :any]]]]))
+     [:on-prompt-clicked [:=> [:cat :map :map [:enum :corp :runner] :string] :map]]]))
 
 (def validate-prompt (m/validator BasePromptSchema))
 (def explain-prompt (m/explainer BasePromptSchema))
@@ -31,11 +30,9 @@
   (on-prompt-clicked [this game player arg]
     (on-prompt-clicked this game player arg))
   (validate [this]
-    (if (validate-prompt this)
-      this
-      (let [explained-error (explain-prompt (into {} this))]
-        (throw (ex-info (str "Prompt step isn't valid: " (pr-str (me/humanize explained-error)))
-                        (select-keys explained-error [:errors])))))))
+    (assert (validate-prompt this)
+            (me/humanize (explain-prompt this)))
+    this))
 
 (defn bind-buttons
   [step prompt]
@@ -79,8 +76,7 @@
     [completed game]))
 
 (defn base-prompt
-  [{:keys [active-condition active-prompt waiting-text
-           on-prompt-clicked]}]
+  [{:keys [active-condition active-prompt waiting-text on-prompt-clicked]}]
   (->> {:active-condition
         (cond
           (fn? active-condition) active-condition
@@ -91,7 +87,7 @@
         :complete? false
         :continue-step prompt-continue-step
         :on-prompt-clicked (or on-prompt-clicked
-                               (fn [_this game _player _arg] [false game]))
+                               (fn [_this game _player _arg] game))
         :type :step/prompt
         :uuid (java.util.UUID/randomUUID)}
        (map->PromptStep)
@@ -108,10 +104,10 @@
   [choices]
   (fn [_this game _player arg]
     (if-let [choice (get choices arg)]
-      [true (-> game
-                (choice)
-                (pipeline/complete-current-step))]
-      [false game])))
+      (-> game
+          (choice)
+          (pipeline/complete-current-step))
+      game)))
 
 (def HandlerPromptPropsSchema
   [:map {:closed true}
@@ -128,7 +124,8 @@
 (defn handler-prompt
   [{:keys [active-condition active-text waiting-text choices] :as props}]
   (let [buttons (mapv (fn [k] {:text k :arg k}) (keys choices))]
-    (assert (validate-handler-props props) (me/humanize (explain-handler-props props)))
+    (assert (validate-handler-props props)
+            (me/humanize (explain-handler-props props)))
     (base-prompt
       {:active-condition active-condition
        :waiting-text waiting-text

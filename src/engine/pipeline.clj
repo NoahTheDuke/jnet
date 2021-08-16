@@ -41,4 +41,4 @@
   [game player button]
   (if-let [step (get-current-step game)]
     (step/on-prompt-clicked step game player button)
-    [false game]))
+    game))

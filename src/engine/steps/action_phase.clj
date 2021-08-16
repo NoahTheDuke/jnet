@@ -17,12 +17,11 @@
 
 (defn action-prompt-clicked
   [_this game player _arg]
-  (let [game (-> game
-                 (pipeline/complete-current-step)
-                 (msg/add-message "{0} gains 1 credit." [(get game player)])
-                 (update-in [player :credits] inc)
-                 (update-in [player :clicks] dec))]
-    [true game]))
+  (-> game
+      (pipeline/complete-current-step)
+      (msg/add-message "{0} gains 1 credit." [(get game player)])
+      (update-in [player :credits] inc)
+      (update-in [player :clicks] dec)))
 
 (defn active-player?
   [_this {:keys [active-player]} player]

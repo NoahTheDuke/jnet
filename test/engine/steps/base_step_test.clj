@@ -4,7 +4,7 @@
    [engine.steps.step :as sut]))
 
 (deftest base-step-test
-  (is (thrown? clojure.lang.ExceptionInfo (sut/validate (sut/map->BaseStep {}))))
+  (is (thrown? java.lang.AssertionError (sut/validate (sut/map->BaseStep {}))))
   (let [continue-fn (constantly [true false])
         step (sut/make-base-step {:continue-step continue-fn})]
     (is (= [true false] (sut/continue-step step {}))))

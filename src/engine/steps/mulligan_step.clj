@@ -21,16 +21,16 @@
                  (pipeline/complete-current-step)
                  (msg/add-message message [(get game player)]))]
     (if (= arg "keep")
-      [true game]
+      game
       (let [hand (get-in game [player :hand])
             deck (get-in game [player :deck])
             new-deck (->> deck
                           (concat hand)
                           (shuffle)
                           (into []))]
-        [true (-> game
-                  (assoc [player :deck] new-deck)
-                  (draw/draw player 5))]))))
+        (-> game
+            (assoc [player :deck] new-deck)
+            (draw/draw player 5))))))
 
 (defn mulligan-prompt [player]
   (prompt/base-prompt
