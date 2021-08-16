@@ -3,7 +3,7 @@
    [clojure.test :refer [deftest is]]
    [engine.game :as game]
    [engine.prompt-state :as prompt-state]
-   [engine.helper-test :refer [click-prompt get-messages]]))
+   [engine.test-utils :refer [click-prompt get-messages]]))
 
 (deftest mulligan-messages-test
   (is (= [{:text [{:name "Corp player"} "has kept their hand"]}

@@ -3,7 +3,7 @@
    [clojure.test :refer [deftest is]]
    [engine.game :as game]
    [engine.messages :as sut]
-   [engine.helper-test :refer [get-messages]]))
+   [engine.test-utils :refer [get-messages]]))
 
 (deftest chat-log-test
   (is (= [{:text ["Hello!"]}]

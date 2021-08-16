@@ -3,9 +3,9 @@
     [engine.prompt-state :as prompt-state]))
 
 (defn new-player
-  [{:keys [user identity deck]}]
-  {:deck-list (or deck [])
-   :deck (or deck [])
+  [{:keys [user identity deck-list]}]
+  {:deck-list (or deck-list [])
+   :deck (or deck-list [])
    :discard []
    :hand []
    :hand-size 5

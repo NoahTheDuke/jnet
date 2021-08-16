@@ -2,7 +2,7 @@
   (:require
    [malli.core :as m]))
 
-(def Card
+(def PrintedCard
   [:map
    [:advancement-requirement {:optional true} int?]
    [:agenda-points {:optional true} int?]
@@ -21,5 +21,5 @@
    [:uniqueness boolean?]])
 
 (defn map->Card [card]
-  (assert (m/validate Card card) (:errors (m/explain Card card)))
+  (assert (m/validate PrintedCard card) (:errors (m/explain PrintedCard card)))
   card)

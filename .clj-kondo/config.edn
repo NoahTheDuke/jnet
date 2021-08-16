@@ -1,4 +1,4 @@
-{:linters {:refer-all {:exclude [engine.helper-test]}}
+{:linters {:refer-all {:exclude [engine.test-utils]}}
  :lint-as {com.rpl.specter/defcollector clojure.core/defn
            com.rpl.specter/defdynamicnav clojure.core/defn
            com.rpl.specter/defmacroalias clojure.core/def

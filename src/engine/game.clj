@@ -9,7 +9,7 @@
    [engine.steps.action-phase :refer [action-phase]]
    [engine.steps.start-of-turn-phase :refer [start-of-turn-phase]]))
 
-(defn new-game
+(defn make-game
   [{:keys [corp runner]}]
   {:corp (player/new-corp corp)
    :runner (player/new-runner runner)
@@ -41,7 +41,7 @@
 
 (defn start-new-game
   [opts]
-  (-> (new-game opts)
+  (-> (make-game opts)
       (pipeline/queue-step (setup-phase))
       (pipeline/queue-step (begin-turn))
       (pipeline/continue-game)))

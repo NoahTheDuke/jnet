@@ -47,6 +47,15 @@
 
 (def card-data (atom nil))
 
+(defn make-card [id]
+  (let [card (get @card-data id)]
+    (-> card
+        ; (assoc :printed-advancement-requirement (:advancement-requirement card))
+        ; (assoc :printed-agenda-points (:agenda-points card))
+        ; (assoc :printed-strength (:strength card))
+        ; (assoc :printed-subtypes (:subtypes card))
+        )))
+
 (defn load-card-data []
   (->> (io/resource "engine/raw_data.edn")
        (slurp)
@@ -62,6 +71,6 @@
   [{:keys [identity cards]}]
   (let [deck (->> cards
                   (mapcat #(repeat (:qty %) (:name %)))
-                  (mapv #(get @card-data %)))]
+                  (keep #(make-card %)))]
     {:deck-list deck
-     :identity (get @card-data identity)}))
+     :identity (make-card identity)}))

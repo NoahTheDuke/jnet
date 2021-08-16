@@ -6,7 +6,7 @@
    [engine.pipeline :as pipeline]
    [engine.prompt-state :as prompt-state]
    [engine.steps.prompt :as sut]
-   [engine.helper-test :refer [click-prompt]]))
+   [engine.test-utils :refer [click-prompt]]))
 
 (deftest make-prompt-test
   (let [active-condition (constantly true)
@@ -39,7 +39,7 @@
                  {:active-condition :corp
                   :active-prompt (constantly active-prompt)
                   :waiting-text waiting-text})
-          game (game/new-game {})]
+          game (game/make-game {})]
       (testing "active-condition checks the player arg"
         (is ((:active-condition step) step game :corp))
         (is (not ((:active-condition step) step game :runner))))
@@ -58,7 +58,7 @@
                  {:active-condition :corp
                   :active-prompt (constantly active-prompt)
                   :waiting-text waiting-text})
-          game (game/new-game nil)
+          game (game/make-game nil)
           {:keys [corp runner] :as new-game} (sut/set-prompt step game)]
       (is (not= game new-game))
       (is (= (:header active-prompt) (get-in corp [:prompt-state :header])))
@@ -72,7 +72,7 @@
           step (sut/base-prompt
                  {:active-condition :corp
                   :active-prompt (constantly active-prompt)})
-          game (-> (game/new-game {})
+          game (-> (game/make-game {})
                    (pipeline/queue-step step)
                    (pipeline/continue-game))]
       (is (= (:header active-prompt)
@@ -87,7 +87,7 @@
           step (sut/base-prompt
                  {:active-condition :corp
                   :active-prompt (constantly active-prompt)})
-          {:keys [corp runner]} (-> (game/new-game {})
+          {:keys [corp runner]} (-> (game/make-game {})
                                     (pipeline/queue-step step)
                                     (assoc-in [:gp :queue 0 :complete?] true)
                                     (pipeline/continue-game))]
@@ -105,17 +105,17 @@
                           "Draw 2" (fn [game]
                                      (draw/draw game :corp 2))}})]
     (is (= "How many to draw?"
-           (-> (game/new-game nil)
+           (-> (game/make-game nil)
                (pipeline/queue-step step)
                (pipeline/continue-game)
                (prompt-state/prompt-text :corp))))
     (is (= "Corp to draw"
-           (-> (game/new-game nil)
+           (-> (game/make-game nil)
                (pipeline/queue-step step)
                (pipeline/continue-game)
                (prompt-state/prompt-text :runner))))
     (is (= 2
-           (-> (game/new-game {:corp {:deck [:a :b :c]}})
+           (-> (game/make-game {:corp {:deck [:a :b :c]}})
                (pipeline/queue-step step)
                (pipeline/continue-game)
                (click-prompt :corp "Draw 2")

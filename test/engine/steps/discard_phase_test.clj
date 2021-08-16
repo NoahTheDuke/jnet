@@ -6,10 +6,10 @@
    [engine.pipeline :as pipeline]
    [engine.prompt-state :as prompt-state]
    [engine.steps.discard-phase :as sut]
-   [engine.helper-test :refer [get-messages]]))
+   [engine.test-utils :refer :all]))
 
 (deftest discard-phase-test
-  (let [game (-> (game/new-game {:corp {:user {:username "Corp player"}
+  (let [game (-> (game/make-game {:corp {:user {:username "Corp player"}
                                         :deck [:a :b :c :d :e :f :g :h :i :j]}})
                  (draw/draw :corp 5)
                  (pipeline/queue-step (sut/discard-phase)))]
@@ -18,6 +18,12 @@
                     (pipeline/continue-game)
                     (prompt-state/prompt-text :corp))))
       (is (= "Select cards to discard"
+             (-> game
+                 (draw/draw :corp 1)
+                 (pipeline/continue-game)
+                 (prompt-state/prompt-text :corp)))))
+    (testing "Selecting cards discards them"
+      (is (= [:a]
              (-> game
                  (draw/draw :corp 1)
                  (pipeline/continue-game)

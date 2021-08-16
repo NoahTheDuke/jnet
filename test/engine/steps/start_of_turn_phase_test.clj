@@ -5,7 +5,7 @@
    [engine.pipeline :as pipeline]
    [engine.player :as player]
    [engine.steps.start-of-turn-phase :as sut]
-   [engine.helper-test :refer [click-prompt]]))
+   [engine.test-utils :refer [click-prompt]]))
 
 (deftest active-player-test
   (is (= :corp
@@ -17,12 +17,12 @@
 
 (deftest gain-allotted-clicks-test
   (is (= (:clicks-per-turn (player/new-corp nil))
-         (-> (game/new-game nil)
+         (-> (game/make-game nil)
              (pipeline/queue-step (sut/gain-allotted-clicks))
              (pipeline/continue-game)
              (get-in [:corp :clicks]))))
   (is (= (:clicks-per-turn (player/new-runner nil))
-         (-> (game/new-game nil)
+         (-> (game/make-game nil)
              (assoc :active-player :runner)
              (pipeline/queue-step (sut/gain-allotted-clicks))
              (pipeline/continue-game)

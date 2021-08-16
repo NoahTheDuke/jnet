@@ -15,7 +15,8 @@
         :header "Discard"
         :text "Select cards to discard"
         :buttons [{:text "Card 1" :arg "1"}]})
-     :on-prompt-clicked (fn [_this game _player _arg] [true game])}))
+     :on-prompt-clicked (fn [_this game _player _arg]
+                          [true (pipeline/complete-current-step game)])}))
 
 (defn should-discard? []
   (simple-step

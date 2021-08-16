@@ -5,17 +5,17 @@
    [engine.pipeline :as pipeline]
    [engine.prompt-state :as prompt-state]
    [engine.steps.action-phase :as sut]
-   [engine.helper-test :refer [click-prompt]]))
+   [engine.test-utils :refer [click-prompt]]))
 
 (deftest action-window-prompt-test
   (is (= "You have 3 clicks. Choose an action."
-         (-> (game/new-game nil)
+         (-> (game/make-game nil)
              (assoc-in [:corp :clicks] 3)
              (pipeline/queue-step (sut/action-window))
              (pipeline/continue-game)
              (prompt-state/prompt-text :corp))))
   (is (= ""
-         (-> (game/new-game nil)
+         (-> (game/make-game nil)
              (assoc-in [:corp :clicks] 3)
              (pipeline/queue-step (sut/action-window))
              (pipeline/continue-game)
@@ -24,14 +24,14 @@
 
 (deftest action-window-buttons-test
   (is (= 1
-         (-> (game/new-game nil)
+         (-> (game/make-game nil)
              (pipeline/queue-step (sut/action-window))
              (pipeline/continue-game)
              (click-prompt :corp "[click]: Gain 1[c].")
              (:corp)
              (:credits))))
   (is (= -1
-         (-> (game/new-game nil)
+         (-> (game/make-game nil)
              (pipeline/queue-step (sut/action-window))
              (pipeline/continue-game)
              (click-prompt :corp "[click]: Gain 1[c].")
@@ -39,7 +39,7 @@
              (:clicks)))))
 
 (deftest action-phase-repeats
-  (let [game (-> (game/new-game nil)
+  (let [game (-> (game/make-game nil)
                  (assoc-in [:corp :clicks] 2)
                  (pipeline/queue-step (sut/action-phase))
                  (pipeline/continue-game)
