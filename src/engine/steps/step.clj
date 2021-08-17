@@ -10,8 +10,8 @@
   (continue-step [this game] "Calls the :continue function on the step. Should provide wrapping functionality in the protocol implementation.")
   (complete? [this] "Is the step complete?")
   (validate [this] "Validation through an external malli schema.")
-  ; (on-card-clicked [this game player card] "What should happen when a card is clicked.")
-  (on-prompt-clicked [this game player arg] "What should happen when a button on a prompt is clicked."))
+  (on-prompt-clicked [this game player arg] "What should happen when a button on a prompt is clicked.")
+  (on-card-clicked [this game player card] "What should happen when a card is clicked."))
 
 (defn ^:private -continue-step
   [this]
@@ -25,18 +25,23 @@
 (defn ^:private -on-prompt-clicked
   [this]
   (throw (ex-info (str "Step <" this "> is not a valid step") {:step this})))
+(defn ^:private -on-card-clicked
+  [this]
+  (throw (ex-info (str "Step <" this "> is not a valid step") {:step this})))
 
 (extend-protocol Step
   Object
   (continue-step [this _game] (-continue-step this))
   (complete? [this] (-complete? this))
   (validate [this] (-validate this))
-  (on-card-clicked [this _game _player _arg] (-on-prompt-clicked this))
+  (on-prompt-clicked [this _game _player _arg] (-on-prompt-clicked this))
+  (on-card-clicked [this _game _player _arg] (-on-card-clicked this))
   nil
   (continue-step [this _game] (-continue-step this))
   (complete? [this] (-complete? this))
   (validate [this] (-validate this))
-  (on-card-clicked [this _game _player _arg] (-on-prompt-clicked this)))
+  (on-prompt-clicked [this _game _player _arg] (-on-prompt-clicked this))
+  (on-card-clicked [this _game _player _arg] (-on-card-clicked this)))
 
 (def BaseStepSchema
   [:map {:closed true}

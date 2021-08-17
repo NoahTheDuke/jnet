@@ -94,30 +94,3 @@
       (is (= "" (get-in corp [:prompt-state :header])))
       (is (= "" (get-in corp [:prompt-state :text])))
       (is (= "" (get-in runner [:prompt-state :text]))))))
-
-(deftest prompt-with-handlers-test
-  (let [step (sut/handler-prompt
-               {:active-condition :corp
-                :active-text "How many to draw?"
-                :waiting-text "Corp to draw"
-                :choices {"Draw 1" (fn [game]
-                                     (draw/draw game :corp 1))
-                          "Draw 2" (fn [game]
-                                     (draw/draw game :corp 2))}})]
-    (is (= "How many to draw?"
-           (-> (game/make-game nil)
-               (pipeline/queue-step step)
-               (pipeline/continue-game)
-               (prompt-state/prompt-text :corp))))
-    (is (= "Corp to draw"
-           (-> (game/make-game nil)
-               (pipeline/queue-step step)
-               (pipeline/continue-game)
-               (prompt-state/prompt-text :runner))))
-    (is (= 2
-           (-> (game/make-game {:corp {:deck-list (a-deck :corp)}})
-               (pipeline/queue-step step)
-               (pipeline/continue-game)
-               (click-prompt :corp "Draw 2")
-               (get-in [:corp :hand])
-               (count))))))
