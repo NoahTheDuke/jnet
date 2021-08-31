@@ -1,31 +1,31 @@
 (ns engine.pipeline
   (:require
-   [com.rpl.specter :as specter]
    [engine.steps.step :as step]))
 
 (defn queue-step
   [game step]
   (step/validate step)
-  (specter/setval [:gp :queue specter/AFTER-ELEM] step game))
+  (update-in game [:gp :queue] conj step))
 
 (defn get-current-step
   [game]
-  (get-in game [:gp :pipeline 0]))
+  (peek (get-in game [:gp :pipeline])))
 
 (defn complete-current-step
   [game]
-  (assoc-in game [:gp :pipeline 0 :complete?] true))
+  (update-in game [:gp :pipeline] #(conj (rest %)
+                                         (assoc (first %) :complete? true))))
 
 (defn drop-current-step
   [game]
-  (specter/setval [:gp :pipeline specter/FIRST] specter/NONE game))
+  (update-in game [:gp :pipeline] rest))
 
 (defn update-pipeline
   [game]
-  (let [queue (specter/select [:gp :queue specter/ALL] game)]
-    (->> game
-         (specter/setval [:gp :queue specter/ALL] specter/NONE)
-         (specter/setval [:gp :pipeline specter/BEGINNING] queue))))
+  (let [queue (get-in game [:gp :queue])]
+    (-> game
+        (assoc-in [:gp :queue] [])
+        (update-in [:gp :pipeline] into (reverse queue)))))
 
 (defn continue-game
   [game]

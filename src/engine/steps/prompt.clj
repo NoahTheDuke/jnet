@@ -3,6 +3,7 @@
   (:require
    [engine.player :as player]
    [engine.steps.step :as step]
+   [cond-plus.core :refer [cond+]]
    [malli.core :as m]
    [malli.error :as me]
    [malli.util :as mu]))
@@ -76,10 +77,10 @@
 (defn base-prompt
   [{:keys [active-condition active-prompt waiting-text on-prompt-clicked]}]
   (->> {:active-condition
-        (cond
-          (fn? active-condition) active-condition
-          (keyword? active-condition) (fn [_this _game player]
-                                        (= player active-condition)))
+        (cond+
+          [(fn? active-condition) active-condition]
+          [(keyword? active-condition) (fn [_this _game player]
+                                         (= player active-condition))])
         :active-prompt active-prompt
         :waiting-prompt {:text (or waiting-text "Waiting for opponent")}
         :complete? false

@@ -17,7 +17,7 @@
   [{:keys [corp runner]}]
   {:corp (player/new-corp corp)
    :runner (player/new-runner runner)
-   :gp {:pipeline []
+   :gp {:pipeline '()
         :queue []}
    :active-player :corp
    :inactive-player :runner
