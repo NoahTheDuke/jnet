@@ -10,7 +10,7 @@
   (prompt/base-prompt
     {:active-condition :corp
      :active-prompt
-     (fn [this game player]
+     (fn [_this _game _player]
        {:select-card true
         :header "Discard"
         :text "Select cards to discard"

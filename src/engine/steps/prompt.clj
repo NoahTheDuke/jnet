@@ -26,12 +26,13 @@
   step/Step
   (continue-step [this game] (continue-step this game))
   (complete? [_] complete?)
-  (on-prompt-clicked [this game player arg]
-    (on-prompt-clicked this game player arg))
   (validate [this]
     (assert (validate-prompt this)
             (me/humanize (explain-prompt this)))
-    this))
+    this)
+  step/Prompt
+  (on-prompt-clicked [this game player arg]
+    (on-prompt-clicked this game player arg)))
 
 (defn bind-buttons
   [step prompt]

@@ -9,9 +9,7 @@
   and implemented for all steps."
   (continue-step [this game] "Calls the :continue function on the step. Should provide wrapping functionality in the protocol implementation.")
   (complete? [this] "Is the step complete?")
-  (validate [this] "Validation through an external malli schema.")
-  (on-prompt-clicked [this game player arg] "What should happen when a button on a prompt is clicked.")
-  (on-card-clicked [this game player card] "What should happen when a card is clicked."))
+  (validate [this] "Validation through an external malli schema."))
 
 (defn ^:private -continue-step
   [this]
@@ -34,12 +32,20 @@
   (continue-step [this _game] (-continue-step this))
   (complete? [this] (-complete? this))
   (validate [this] (-validate this))
-  (on-prompt-clicked [this _game _player _arg] (-on-prompt-clicked this))
-  (on-card-clicked [this _game _player _arg] (-on-card-clicked this))
   nil
   (continue-step [this _game] (-continue-step this))
   (complete? [this] (-complete? this))
-  (validate [this] (-validate this))
+  (validate [this] (-validate this)))
+
+(defprotocol Prompt
+  (on-prompt-clicked [this game player arg] "What should happen when a button on a prompt is clicked.")
+  (on-card-clicked [this game player card] "What should happen when a card is clicked."))
+
+(extend-protocol Prompt
+  Object
+  (on-prompt-clicked [this _game _player _arg] (-on-prompt-clicked this))
+  (on-card-clicked [this _game _player _arg] (-on-card-clicked this))
+  nil
   (on-prompt-clicked [this _game _player _arg] (-on-prompt-clicked this))
   (on-card-clicked [this _game _player _arg] (-on-card-clicked this)))
 
@@ -49,16 +55,14 @@
                     [:cat :boolean :any]]]
    [:type [:qualified-keyword {:namespace :step}]]
    [:uuid uuid?]])
-
 (def validate-base-step (m/validator BaseStepSchema))
 (def explain-base-step (m/explainer BaseStepSchema))
 
 (defrecord BaseStep
   [continue-step type uuid]
   Step
-  (continue-step [this state] (continue-step this state))
+  (continue-step [this game] (continue-step this game))
   (complete? [_])
-  (on-prompt-clicked [_this game _player _arg] game)
   (validate [this]
     (assert (validate-base-step this)
             (me/humanize (explain-base-step this)))

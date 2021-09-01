@@ -35,7 +35,6 @@
    [:condition {:optional true} [:=> [:cat :map] :boolean]]
    [:phase {:optional true} :keyword]
    [:steps {:optional true} [:* :any]]])
-
 (def validate-opts (m/validator PhaseOptsSchema))
 (def explain-opts (m/explainer PhaseOptsSchema))
 
