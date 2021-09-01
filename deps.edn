@@ -1,6 +1,6 @@
 {:deps {org.clojure/clojure {:mvn/version "1.10.3"}
         aero/aero {:mvn/version "1.1.6"}
-        cond-plus/cond-plus {:mvn/version "1.1.0"}
+        cond-plus/cond-plus {:mvn/version "1.1.1"}
         integrant/integrant {:mvn/version "0.8.0"}
         integrant/repl {:mvn/version "0.3.2"}
         medley/medley {:mvn/version "1.3.0"}
