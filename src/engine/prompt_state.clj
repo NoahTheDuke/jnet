@@ -33,11 +33,11 @@
       (validate-prompt-state)))
 
 (def PromptOptsSchema
-  (-> [:map {:closed true}
-       [:select-card {:optional true} boolean?]
-       [:header {:optional true} string?]
-       [:text string?]
-       [:buttons {:optional true} [:* :any]]]))
+  [:map {:closed true}
+   [:select-card {:optional true} boolean?]
+   [:header {:optional true} string?]
+   [:text string?]
+   [:buttons {:optional true} [:* :any]]])
 (def valid-prompt-opts? (m/validator PromptOptsSchema))
 (def explain-prompt-opts (m/explainer PromptOptsSchema))
 

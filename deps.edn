@@ -6,7 +6,8 @@
         medley/medley {:mvn/version "1.3.0"}
         metosin/malli {:mvn/version "0.6.1"}}
  :paths ["src" "resources"]
- :aliases {:repl/rebel
+ :aliases {:test {:extra-paths ["test"]}
+           :repl/rebel
            {:extra-deps {nrepl/nrepl                {:mvn/version "0.8.3"}
                          cider/cider-nrepl          {:mvn/version "0.26.0"}
                          com.bhauman/rebel-readline {:mvn/version "0.1.4"}}
@@ -15,49 +16,29 @@
                          "-i"
                          "-f" "rebel-readline.main/-main"]}
 
-           :run-m {:main-opts ["-m" "game.core"]}
-           :run-x {:ns-default game.core
-                   :exec-fn greet
-                   :exec-args {:name "Clojure"}}
-
            ;; testing
-           :test/cognitect
-           {:extra-paths ["test"]
-            :extra-deps  {com.cognitect/test-runner
+           :cognitect
+           {:extra-deps  {com.cognitect/test-runner
                           {:git/url "https://github.com/cognitect-labs/test-runner.git"
                            :sha     "f597341b6ca7bb4cf027e0a34a6710ca9cb969da"}}
             :main-opts   ["-m" "cognitect.test-runner"]
             :exec-fn cognitect.test-runner.api/test}
-           :test/kaocha
-           {:extra-paths ["test"]
-            :extra-deps {lambdaisland/kaocha {:mvn/version "1.0.861"}}
+           :kaocha
+           {:extra-deps {lambdaisland/kaocha {:mvn/version "1.0.861"}}
             :main-opts ["-m" "kaocha.runner"]}
-           :test-kaocha-cljs
-           {:extra-paths ["test"]
-            :extra-deps  {lambdaisland/kaocha      {:mvn/version "1.0.861"}
+           :kaocha-cljs
+           {:extra-deps  {lambdaisland/kaocha      {:mvn/version "1.0.861"}
                           lambdaisland/kaocha-cljs {:mvn/version "1.0.71"}}
-            :main-opts   ["-m" "kaocha.runner"]}
-
-           ;; linting
-           :lint/kondo
-           {:extra-deps {clj-kondo/clj-kondo {:mvn/version "2021.06.18"}}
-            :main-opts  ["-m" "clj-kondo.main" "--lint" "src"]}
-
+            :main-opts ["-m" "kaocha.runner"]}
 
            ;; Eastwood - classic lint tool
            ;; https://github.com/jonase/eastwood#running-eastwood-in-a-repl
-           :lint/eastwood
-           {:extra-deps {jonase/eastwood {:mvn/version "0.8.1"}}
-            :main-opts  ["-m" "eastwood.lint"
-                         "{:source-paths,[\"src\"],:test-paths,[\"test\"]}"]}
-
-
-           ;; kibit - suggest idiomatic use of Clojure
-           ;; https://github.com/jonase/kibit/issues/221
-           :lint/idiom
-           {:replace-paths []
-            :replace-deps  {tvaughan/kibit-runner {:mvn/version "1.0.1"}}
-            :main-opts     ["-m" "kibit-runner.cmdline"]}
+           :eastwood
+           {:extra-paths ["test"]
+            :extra-deps {jonase/eastwood {:mvn/version "0.8.1"}}
+            :exec-fn eastwood.lint/-main
+            :exec-args {:source-paths ["src"]
+                        :test-paths ["test"]}}
 
            ;; compilation
            :uberjar {:replace-deps {com.github.seancorfield/depstar {:mvn/version "2.1.278"}}

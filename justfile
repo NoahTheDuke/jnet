@@ -1,14 +1,14 @@
 test:
-    clojure -M:test/cognitect
+    clojure -M:test:cognitect
 
 test-focus:
-    clojure -M:test/cognitect -i :focus
+    clojure -M:test:cognitect -i :focus
 
 kaocha:
-    clojure -M:test/kaocha
+    clojure -M:test:kaocha
 
 watch:
-    clojure -M:test/kaocha --watch
+    clojure -M:test:kaocha --watch
 
 repl:
-    clojure -M:repl/rebel
+    clojure -M:test:repl/rebel
