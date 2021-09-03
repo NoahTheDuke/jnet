@@ -23,6 +23,7 @@
 
 (defrecord PromptStep
   [complete? on-prompt-clicked continue-step type uuid]
+
   step/Step
   (continue-step [this game] (continue-step this game))
   (complete? [_] complete?)
@@ -30,6 +31,7 @@
     (assert (validate-prompt this)
             (me/humanize (explain-prompt this)))
     this)
+
   step/Prompt
   (on-prompt-clicked [this game player arg]
     (on-prompt-clicked this game player arg)))

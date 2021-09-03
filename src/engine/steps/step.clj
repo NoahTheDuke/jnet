@@ -1,7 +1,8 @@
 (ns engine.steps.step
   (:require
-    [malli.core :as m]
-    [malli.error :as me]))
+   [hyperfiddle.rcf :refer [tests]]
+   [malli.core :as m]
+   [malli.error :as me]))
 
 (defprotocol Step
   "Base protocol for all steps. If a function operates on a step directly,
@@ -87,3 +88,35 @@
 (defn simple-step
   [continue-step]
   (make-base-step {:continue-step (simple-step-wrapper continue-step)}))
+
+(defmacro defstep
+  [step-name & body]
+  (let [m (if (string? (first body))
+            [(first body)]
+            [])
+        body (if (string? (first body))
+               (next body)
+               body)
+        m (if (map? (first body))
+            (conj m (first body))
+            m)
+        body (if (map? (first body))
+               (next body)
+               body)
+        args (first body)
+        m (conj m args)
+        body (next body)]
+    (assert (symbol? step-name) "Step name must be a symbol")
+    (assert (and (vector? args) (every? symbol? args)) "Step args must be a vector of symbols")
+    (assert (pos? (count body)) "Step must have a body")
+    `(defn ~step-name ~@m
+       (make-base-step {:continue-step
+                        (fn continue-step# [_# ~'game]
+                          [true (do ~@body)])}))))
+
+(tests
+  (macroexpand '(defstep example "asdf" [] (+ 1 1)))
+  (some? (defstep example "asdf" [] (+ 1 1))) := true
+  (:doc (meta (defstep example "asdf" {:arbitrary true} [] (+ 1 1)))) := "asdf"
+  (:arbitrary (meta (defstep example "asdf" {:arbitrary true} [] (+ 1 1)))) := true
+  )

@@ -1,2 +1,6 @@
 {:config-paths ["cond_plus/cond_plus"]
- :linters {:refer-all {:exclude [engine.test-utils]}}}
+ :skip-comments true
+ :lint-as {engine.steps.step/defstep clojure.core/defn
+           hyperfiddle.rcf/tests clojure.core/comment}
+ :linters {:refer-all {:exclude [engine.test-utils]}
+           :unresolved-symbol {:exclude [(engine.steps.step/defstep [game])]}}}

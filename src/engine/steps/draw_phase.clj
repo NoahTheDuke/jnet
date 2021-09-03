@@ -3,14 +3,12 @@
    [engine.draw :as draw]
    [engine.messages :as msg]
    [engine.steps.phase :as phase]
-   [engine.steps.step :as step :refer [simple-step]]))
+   [engine.steps.step :as step :refer [defstep]]))
 
-(defn mandatory-draw []
-  (simple-step
-    (fn [game]
-      (-> game
-          (msg/add-message "{0} draws 1 card for their mandatory draw." [(:corp game)])
-          (draw/draw :corp 1)))))
+(defstep mandatory-draw []
+  (-> game
+      (msg/add-message "{0} draws 1 card for their mandatory draw." [(:corp game)])
+      (draw/draw :corp 1)))
 
 (defn draw-phase []
   (phase/make-phase

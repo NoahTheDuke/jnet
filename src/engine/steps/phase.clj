@@ -1,21 +1,18 @@
 (ns engine.steps.phase
   (:require
    [engine.pipeline :as pipeline]
-   [engine.steps.step :refer [simple-step]]
-   [malli.core :as m]))
+   [engine.steps.step :refer [defstep simple-step]]
+   [malli.core :as m]
+   [malli.error :as me]))
 
-(defn start-phase
+(defstep start-phase
   [phase]
-  (simple-step
-    (fn [game]
-      (-> game
-          (assoc :current-phase (keyword "phase" (name phase)))))))
+  (-> game
+      (assoc :current-phase (keyword "phase" (name phase)))))
 
-(defn end-phase []
-  (simple-step
-    (fn [game]
-      (-> game
-          (assoc :current-phase nil)))))
+(defstep end-phase []
+  (-> game
+      (assoc :current-phase nil)))
 
 (defn initialize-steps
   [{:keys [phase steps]
@@ -43,7 +40,7 @@
   If :condition is a function that returns true, the phase will be run. Otherwise, the step will exit."
   ([] (make-phase {}))
   ([{condition :condition :as opts}]
-   (assert (validate-opts opts) (:errors (explain-opts opts)))
+   (assert (validate-opts opts) (pr-str (me/humanize (explain-opts opts))))
    (assoc
      (simple-step
        (fn [game]

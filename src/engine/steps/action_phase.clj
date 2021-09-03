@@ -2,9 +2,9 @@
   (:require
    [engine.messages :as msg]
    [engine.pipeline :as pipeline]
+   [engine.steps.phase :as phase]
    [engine.steps.prompt :as prompt]
-   [engine.steps.step :refer [simple-step]]
-   [engine.steps.phase :as phase]))
+   [engine.steps.step :refer [defstep]]))
 
 (defn action-active-prompt
   [_this game player]
@@ -33,14 +33,13 @@
      :active-prompt action-active-prompt
      :on-prompt-clicked action-prompt-clicked}))
 
-(defn check-for-more-clicks []
-  (simple-step
-    (fn [{:keys [active-player] :as game}]
-      (if (pos? (get-in game [active-player :clicks]))
-        (-> game
-            (pipeline/queue-step (action-window))
-            (pipeline/queue-step (check-for-more-clicks)))
-        game))))
+(defstep check-for-more-clicks []
+  (let [{:keys [active-player]} game]
+    (if (pos? (get-in game [active-player :clicks]))
+      (-> game
+          (pipeline/queue-step (action-window))
+          (pipeline/queue-step (check-for-more-clicks)))
+      game)))
 
 (defn action-phase []
   (phase/make-phase
