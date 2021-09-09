@@ -7,7 +7,7 @@
 
 (defn prepare-deck
   [deck]
-  (map #(assoc % :zone :zone/deck) deck))
+  (mapv #(assoc % :zone :deck) deck))
 
 (defn shuffle-deck
   [deck]

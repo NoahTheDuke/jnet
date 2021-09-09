@@ -43,7 +43,8 @@
       (update :faction (comp keyword slugify))
       (update :side (comp keyword slugify))
       (update :subtypes #(mapv (comp keyword slugify) %))
-      (update :type (comp keyword slugify))))
+      (update :type (comp keyword slugify))
+      (assoc :uuid (java.util.UUID/randomUUID))))
 
 (def card-data (atom nil))
 
@@ -72,6 +73,6 @@
   [{:keys [identity cards]}]
   (let [deck (->> cards
                   (mapcat #(repeat (:qty %) (:name %)))
-                  (keep #(make-card %)))]
+                  (keep make-card))]
     {:deck-list deck
      :identity (make-card identity)}))

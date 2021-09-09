@@ -16,20 +16,15 @@
     (testing "both players shuffle their decks"
       (with-redefs [clojure.core/shuffle (comp vec reverse)]
         (is (= [{:name "e"
-                 :location 5
-                 :zone :zone/deck}
+                 :zone :deck}
                 {:name "d"
-                 :location 6
-                 :zone :zone/deck}
+                 :zone :deck}
                 {:name "c"
-                 :location 7
-                 :zone :zone/deck}
+                 :zone :deck}
                 {:name "b"
-                 :location 8
-                 :zone :zone/deck}
+                 :zone :deck}
                 {:name "a"
-                 :location 9
-                 :zone :zone/deck}]
+                 :zone :deck}]
                (-> (game/make-game {:corp {:deck-list deck-list}})
                    (pipeline/queue-step (sut/make-setup-phase))
                    (pipeline/continue-game)

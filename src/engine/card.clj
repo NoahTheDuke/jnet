@@ -18,7 +18,8 @@
    [:text {:optional true} string?]
    [:trash-cost {:optional true} int?]
    [:type keyword?]
-   [:uniqueness boolean?]])
+   [:uniqueness boolean?]
+   [:uuid uuid?]])
 (def validate-printed-card (m/validator PrintedCard))
 (def explain-printed-card (m/explainer PrintedCard))
 
