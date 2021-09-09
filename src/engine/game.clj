@@ -33,10 +33,10 @@
 
 (defstep begin-turn []
   (-> game
-      (pipeline/queue-step (start-of-turn-phase))
-      (pipeline/queue-step (draw-phase))
-      (pipeline/queue-step (action-phase))
-      (pipeline/queue-step (discard-phase))
+      (start-of-turn-phase)
+      (draw-phase)
+      (action-phase)
+      (discard-phase)
       (pipeline/queue-step (switch-active-player))
       (pipeline/queue-step (begin-turn))))
 
@@ -56,8 +56,8 @@
 (defn start-new-game
   [opts]
   (assert (validate-new-game-opts opts)
-          (me/humanize (explain-new-game-opts opts)))
+          (pr-str (me/humanize (explain-new-game-opts opts))))
   (-> (make-game opts)
-      (pipeline/queue-step (setup-phase))
+      (setup-phase)
       (pipeline/queue-step (begin-turn))
       (pipeline/continue-game)))

@@ -1,7 +1,7 @@
 (ns engine.steps.phase
   (:require
    [engine.pipeline :as pipeline]
-   [engine.steps.step :refer [defstep simple-step]]
+   [engine.steps.step :refer [defstep make-base-step]]
    [malli.core :as m]
    [malli.error :as me]))
 
@@ -42,10 +42,11 @@
   ([{condition :condition :as opts}]
    (assert (validate-opts opts) (pr-str (me/humanize (explain-opts opts))))
    (assoc
-     (simple-step
-       (fn [game]
-         (if (or (not (fn? condition))
-                 (condition game))
-           (queue-phase-steps game (initialize-steps opts))
-           game)))
+     (make-base-step {:continue-step
+                      (fn [_ game]
+                        [true
+                         (if (or (not (fn? condition))
+                                 (condition game))
+                           (queue-phase-steps game (initialize-steps opts))
+                           game)])})
        :type :step/phase)))

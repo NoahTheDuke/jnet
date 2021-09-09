@@ -11,7 +11,7 @@
                    {:corp {:user {:username "Corp player"}
                            :deck-list [{:name "hedge-fund"
                                         :qty 1}]}})
-                 (pipeline/queue-step (sut/draw-phase))
+                 (pipeline/queue-step (sut/make-draw-phase))
                  (pipeline/continue-game))]
     (is (= 1 (-> game
                  (get-in [:corp :hand])
@@ -22,7 +22,7 @@
   (is (zero? (-> (game/make-game
                    {:runner {:deck-list [{:name "sure-gamble"
                                           :qty 1}]}})
-                 (pipeline/queue-step (sut/draw-phase))
+                 (pipeline/queue-step (sut/make-draw-phase))
                  (pipeline/continue-game)
                  (get-in [:corp :hand])
                  (count)))))

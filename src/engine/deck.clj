@@ -7,14 +7,8 @@
 
 (defn prepare-deck
   [deck]
-  (map-indexed
-    (fn [idx card]
-      (assoc card :location idx :zone :zone/deck))
-    deck))
+  (map #(assoc % :zone :zone/deck) deck))
 
 (defn shuffle-deck
   [deck]
-  (->> (shuffle deck)
-       (map-indexed
-         (fn [idx card]
-           (assoc card :location idx)))))
+  (shuffle deck))

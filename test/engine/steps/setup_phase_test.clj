@@ -10,7 +10,7 @@
   (let [deck-list (map #(do {:name (str %)}) "abcdefghij")]
     (is (= :phase/setup
            (-> (game/make-game nil)
-               (pipeline/queue-step (sut/setup-phase))
+               (pipeline/queue-step (sut/make-setup-phase))
                (pipeline/continue-game)
                (:current-phase))))
     (testing "both players shuffle their decks"
@@ -31,19 +31,19 @@
                  :location 9
                  :zone :zone/deck}]
                (-> (game/make-game {:corp {:deck-list deck-list}})
-                   (pipeline/queue-step (sut/setup-phase))
+                   (pipeline/queue-step (sut/make-setup-phase))
                    (pipeline/continue-game)
                    (get-in [:corp :deck]))))))
     (testing "both players draw 5 cards"
       (is (= 5
              (-> (game/make-game {:corp {:deck-list deck-list}})
-                 (pipeline/queue-step (sut/setup-phase))
+                 (pipeline/queue-step (sut/make-setup-phase))
                  (pipeline/continue-game)
                  (get-in [:corp :hand])
                  (count))))
       (is (= 5
              (-> (game/make-game {:runner {:deck-list deck-list}})
-                 (pipeline/queue-step (sut/setup-phase))
+                 (pipeline/queue-step (sut/make-setup-phase))
                  (pipeline/continue-game)
                  (get-in [:runner :hand])
                  (count)))))))
@@ -51,7 +51,7 @@
 (deftest mulligan-tests
   (testing "mulligan prompts display correctly"
     (let [game (-> (game/make-game {:corp {:deck-list (a-deck :corp)}})
-                   (pipeline/queue-step (sut/setup-phase))
+                   (pipeline/queue-step (sut/make-setup-phase))
                    (pipeline/continue-game))]
       (is (= {:header "Mulligan"
               :text "Keep or mulligan this hand?"

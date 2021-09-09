@@ -35,8 +35,11 @@
                            [(get game active-player) clicks]))
       game)))
 
-(defn discard-phase []
+(defn make-discard-phase []
   (phase/make-phase
     {:phase :discard
      :steps [(should-discard?)
              (lose-remaining-clicks)]}))
+
+(defn discard-phase [game]
+  (pipeline/queue-step game (make-discard-phase)))

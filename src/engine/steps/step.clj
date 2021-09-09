@@ -118,5 +118,5 @@
   (macroexpand '(defstep example "asdf" [] (+ 1 1)))
   (some? (defstep example "asdf" [] (+ 1 1))) := true
   (:doc (meta (defstep example "asdf" {:arbitrary true} [] (+ 1 1)))) := "asdf"
-  (:arbitrary (meta (defstep example "asdf" {:arbitrary true} [] (+ 1 1)))) := true
+  (:arbitrary (meta (defstep example "asdf" {:arbitrary :arb} [] (+ 1 1)))) := :arb
   )

@@ -41,7 +41,7 @@
 (deftest action-phase-repeats
   (let [game (-> (game/make-game nil)
                  (assoc-in [:corp :clicks] 2)
-                 (pipeline/queue-step (sut/action-phase))
+                 (pipeline/queue-step (sut/make-action-phase))
                  (pipeline/continue-game)
                  (click-prompt :corp "[click]: Gain 1[c]."))]
     (is (= "You have 1 clicks. Choose an action." (prompt-state/prompt-text game :corp)))

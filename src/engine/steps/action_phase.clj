@@ -41,7 +41,10 @@
           (pipeline/queue-step (check-for-more-clicks)))
       game)))
 
-(defn action-phase []
+(defn make-action-phase []
   (phase/make-phase
     {:phase :action
      :steps [(check-for-more-clicks)]}))
+
+(defn action-phase [game]
+  (pipeline/queue-step game (make-action-phase)))
