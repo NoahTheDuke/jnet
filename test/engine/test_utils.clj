@@ -7,6 +7,7 @@
    [malli.dev.pretty :as pretty]
    [engine.game :as game]))
 
+(set! *warn-on-reflection* true)
 (dev/start! {:report (pretty/reporter)})
 (data/load-card-data)
 
